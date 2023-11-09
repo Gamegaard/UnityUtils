@@ -11,7 +11,7 @@ namespace Gamegaard.Utils.Runtime
         {
             trans.localPosition = Vector3.zero;
             trans.localRotation = Quaternion.identity;
-            trans.localScale = new Vector3(1, 1, 1);
+            trans.localScale = Vector3.one;
         }
 
         /// <summary>

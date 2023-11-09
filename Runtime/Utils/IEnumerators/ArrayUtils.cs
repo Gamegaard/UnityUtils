@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using UnityEngine;
 
 namespace Gamegaard.Utils.Runtime
@@ -39,6 +41,64 @@ namespace Gamegaard.Utils.Runtime
             }
 
             return (count > 0) ? sequence.OrderBy(x => rnd.Next()).Take(realAmount).ToArray() : default;
+        }
+
+        /// <summary>
+        /// Obtém uma quantidade aleatória de elementos de um array com base em critérios.
+        /// </summary>
+        /// <typeparam name="T">Tipo genérico</typeparam>
+        /// <param name="sourceArray">Array de elementos de origem</param>
+        /// <param name="numberOfItems">Número de itens a serem obtidos</param>
+        /// <param name="criteria">Critério de seleção</param>
+        /// <returns>Array de elementos aleatórios com base nos critérios</returns>
+        public static T[] GetRandomAmount<T>(this T[] sourceArray, int numberOfItems, System.Func<T, bool> criteria)
+        {
+            System.Random random = new System.Random();
+            List<T> selectedItems = new List<T>();
+            List<T> matchingItems = sourceArray.Where(item => criteria(item)).ToList();
+
+            selectedItems.AddRange(matchingItems);
+            int remainingItemsCount = numberOfItems - matchingItems.Count;
+
+            List<T> remainingItems = sourceArray.Where(item => !criteria(item) && !selectedItems.Contains(item)).ToList();
+
+            while (remainingItemsCount > 0 && remainingItems.Count > 0)
+            {
+                int index = random.Next(remainingItems.Count);
+                selectedItems.Add(remainingItems[index]);
+                remainingItems.RemoveAt(index);
+                remainingItemsCount--;
+            }
+
+            return selectedItems.ToArray();
+        }
+
+        /// <summary>
+        /// Obtém uma quantidade aleatória de elementos da interseção entre um array e uma coleção de valores.
+        /// </summary>
+        /// <typeparam name="T">Tipo genérico</typeparam>
+        /// <param name="sourceArray">Array de elementos de origem</param>
+        /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos na interseção</param>
+        /// <param name="dataValues">Coleção de valores para a interseção</param>
+        /// <returns>Array de elementos aleatórios na interseção</returns>
+        public static T[] GetRandomIntersect<T>(this T[] sourceArray, int amount, IEnumerable<T> dataValues)
+        {
+            T[] intersectedValues = sourceArray.Intersect(dataValues).ToArray();
+            return intersectedValues.GetRandomAmount(amount);
+        }
+
+        /// <summary>
+        /// Obtém uma quantidade aleatória de elementos que não estão em uma coleção de valores.
+        /// </summary>
+        /// <typeparam name="T">Tipo genérico</typeparam>
+        /// <param name="sourceArray">Array de elementos de origem</param>
+        /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos excluindo valores da coleção</param>
+        /// <param name="dataValues">Coleção de valores a serem excluídos</param>
+        /// <returns>Array de elementos aleatórios excluindo valores da coleção</returns>
+        public static T[] GetRandomExcept<T>(this T[] sourceArray, int amount, IEnumerable<T> dataValues)
+        {
+            T[] valuesExcept = sourceArray.Except(dataValues).ToArray();
+            return valuesExcept.GetRandomAmount(amount);
         }
 
         /// <summary>

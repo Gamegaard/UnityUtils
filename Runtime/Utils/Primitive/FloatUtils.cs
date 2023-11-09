@@ -15,7 +15,7 @@ namespace Gamegaard.Utils.Runtime
         /// <summary>
         /// Retorna o valor com o sinal (positivo ou negativo) de forma randominca.
         /// </summary>
-        public static float RandomizeSing(this float value)
+        public static float RandomizeSign(this float value)
         {
             return value *= IntUtils.GetRandomSign();
         }

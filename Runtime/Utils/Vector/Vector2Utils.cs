@@ -117,6 +117,17 @@ namespace Gamegaard.Utils.Runtime
         {
             return Quaternion.Euler(0, 0, degree) * iniVec;
         }
+
+        /// <summary>
+        /// Retorna o valor com clamp nos 2 valores
+        /// </summary>
+        public static Vector2 Clamp(this Vector2 vector, Vector2 min, Vector2 max)
+        {
+            float clampedX = Mathf.Clamp(vector.x, min.x, max.x);
+            float clampedY = Mathf.Clamp(vector.y, min.y, max.y);
+
+            return new Vector2(clampedX, clampedY);
+        }
         #endregion
     }
 }

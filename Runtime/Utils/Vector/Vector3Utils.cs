@@ -168,6 +168,25 @@ namespace Gamegaard.Utils.Runtime
         }
 
         /// <summary>
+        /// Rotates a point around a 2D center by X degrees
+        /// </summary>
+        public static Vector3 RotateAround(this Vector3 vec, Vector2 center, float rotDegrees)
+        {
+            rotDegrees *= Mathf.Deg2Rad;
+
+            float tempX = vec.x - center.x;
+            float tempY = vec.y - center.y;
+
+            float rotatedX = tempX * Mathf.Cos(rotDegrees) - tempY * Mathf.Sin(rotDegrees);
+            float rotatedY = tempX * Mathf.Sin(rotDegrees) + tempY * Mathf.Cos(rotDegrees);
+
+            vec.x = rotatedX + center.x;
+            vec.y = rotatedY + center.y;
+
+            return vec;
+        }
+
+        /// <summary>
         /// Retorna um novo Vector3 com X alterado e demais valores identicos.
         /// </summary>
         public static Vector3 SetVectorXValue(this Vector3 vector, float newXvalue = 0)
@@ -189,6 +208,18 @@ namespace Gamegaard.Utils.Runtime
         public static Vector3 SetVectorZValue(this Vector3 vector, float newZvalue = 0)
         {
             return new Vector3(vector.x, vector.y, newZvalue);
+        }
+
+        /// <summary>
+        /// Retorna o valor com clamp nos 3 valores
+        /// </summary>
+        public static Vector3 Clamp(this Vector3 vector, Vector3 min, Vector3 max)
+        {
+            float clampedX = Mathf.Clamp(vector.x, min.x, max.x);
+            float clampedY = Mathf.Clamp(vector.y, min.y, max.y);
+            float clampedZ = Mathf.Clamp(vector.z, min.z, max.z);
+
+            return new Vector3(clampedX, clampedY, clampedZ);
         }
         #endregion
     }
