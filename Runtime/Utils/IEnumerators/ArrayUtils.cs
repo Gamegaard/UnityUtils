@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using UnityEngine;
+using Random = System.Random;
 
 namespace Gamegaard.Utils.Runtime
 {
@@ -15,7 +17,7 @@ namespace Gamegaard.Utils.Runtime
         /// <returns>elemento aleatório do array</returns>
         public static T GetRandom<T>(this T[] sequence)
         {
-            return sequence.Length > 0 ? sequence[Random.Range(0, sequence.Length)] : default;
+            return sequence.Length > 0 ? sequence[UnityEngine.Random.Range(0, sequence.Length)] : default;
         }
 
         /// <summary>
@@ -24,23 +26,39 @@ namespace Gamegaard.Utils.Runtime
         /// <typeparam name="T">Tipo genérico</typeparam>
         /// <param name="sequence">Array de elementos</param>
         /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos</param>
+        /// <param name="allowDuplicates">Indica se permite valores duplicados</param>
         /// <returns>Array de elementos aleatórios</returns>
-        public static T[] GetRandomAmount<T>(this T[] sequence, int amount)
+        public static T[] GetRandomAmount<T>(this T[] sequence, int amount, bool allowDuplicates = false)
         {
-            System.Random rnd = new System.Random();
-            int realAmount;
-            int count = sequence.Count();
-            if (count < amount)
+            if (sequence == null || amount <= 0)
             {
-                realAmount = count;
-            }
-            else
-            {
-                Debug.LogWarning("GetRandom with reduced amount. The list has less elements than required.");
-                realAmount = amount;
+                return Array.Empty<T>();
             }
 
-            return (count > 0) ? sequence.OrderBy(x => rnd.Next()).Take(realAmount).ToArray() : default;
+            Random rnd = new Random();
+            List<T> shuffledList = sequence.OrderBy(x => rnd.Next()).ToList();
+
+            if (!allowDuplicates && shuffledList.Count <= amount)
+            {
+                Debug.LogWarning("GetRandom with reduced amount. The list has fewer elements than required.");
+                amount = shuffledList.Count;
+            }
+
+            HashSet<T> selectedSet = new HashSet<T>();
+            List<T> selectedItems = new List<T>();
+
+            while (selectedItems.Count < amount)
+            {
+                int index = rnd.Next(shuffledList.Count);
+                T selectedItem = shuffledList[index];
+
+                if (allowDuplicates || selectedSet.Add(selectedItem))
+                {
+                    selectedItems.Add(selectedItem);
+                }
+            }
+
+            return selectedItems.ToArray();
         }
 
         /// <summary>
@@ -50,24 +68,33 @@ namespace Gamegaard.Utils.Runtime
         /// <param name="sourceArray">Array de elementos de origem</param>
         /// <param name="numberOfItems">Número de itens a serem obtidos</param>
         /// <param name="criteria">Critério de seleção</param>
+        /// <param name="allowDuplicates">Indica se permite valores duplicados</param>
         /// <returns>Array de elementos aleatórios com base nos critérios</returns>
-        public static T[] GetRandomAmount<T>(this T[] sourceArray, int numberOfItems, System.Func<T, bool> criteria)
+        public static T[] GetRandomAmount<T>(this T[] sourceArray, int numberOfItems, Func<T, bool> criteria, bool allowDuplicates = false)
         {
-            System.Random random = new System.Random();
             List<T> selectedItems = new List<T>();
             List<T> matchingItems = sourceArray.Where(item => criteria(item)).ToList();
 
-            selectedItems.AddRange(matchingItems);
-            int remainingItemsCount = numberOfItems - matchingItems.Count;
+            int remainingItemsCount = numberOfItems;
 
-            List<T> remainingItems = sourceArray.Where(item => !criteria(item) && !selectedItems.Contains(item)).ToList();
+            if (allowDuplicates)
+            {
+                selectedItems.AddRange(matchingItems);
+                remainingItemsCount -= matchingItems.Count;
+            }
+
+            List<T> remainingItems = matchingItems.ToList();
+            Random random = new Random();
 
             while (remainingItemsCount > 0 && remainingItems.Count > 0)
             {
-                int index = random.Next(remainingItems.Count);
-                selectedItems.Add(remainingItems[index]);
-                remainingItems.RemoveAt(index);
+                int next = random.Next(remainingItems.Count);
+                selectedItems.Add(remainingItems[next]);
                 remainingItemsCount--;
+                if (!allowDuplicates)
+                {
+                    remainingItems.RemoveAt(next);
+                }
             }
 
             return selectedItems.ToArray();
@@ -80,8 +107,9 @@ namespace Gamegaard.Utils.Runtime
         /// <param name="sourceArray">Array de elementos de origem</param>
         /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos na interseção</param>
         /// <param name="dataValues">Coleção de valores para a interseção</param>
+        /// <param name="allowDuplicates">Indica se permite valores duplicados</param>
         /// <returns>Array de elementos aleatórios na interseção</returns>
-        public static T[] GetRandomIntersect<T>(this T[] sourceArray, int amount, IEnumerable<T> dataValues)
+        public static T[] GetRandomIntersect<T>(this T[] sourceArray, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
         {
             T[] intersectedValues = sourceArray.Intersect(dataValues).ToArray();
             return intersectedValues.GetRandomAmount(amount);
@@ -94,8 +122,9 @@ namespace Gamegaard.Utils.Runtime
         /// <param name="sourceArray">Array de elementos de origem</param>
         /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos excluindo valores da coleção</param>
         /// <param name="dataValues">Coleção de valores a serem excluídos</param>
+        /// <param name="allowDuplicates">Indica se permite valores duplicados</param>
         /// <returns>Array de elementos aleatórios excluindo valores da coleção</returns>
-        public static T[] GetRandomExcept<T>(this T[] sourceArray, int amount, IEnumerable<T> dataValues)
+        public static T[] GetRandomExcept<T>(this T[] sourceArray, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
         {
             T[] valuesExcept = sourceArray.Except(dataValues).ToArray();
             return valuesExcept.GetRandomAmount(amount);
@@ -122,7 +151,7 @@ namespace Gamegaard.Utils.Runtime
         /// <returns>Retorna verdadeiro se o item for encontrado no array, falso caso contrário</returns>
         public static bool FindIndex<T>(this T[] array, T item, out int value)
         {
-            value = System.Array.FindIndex(array, val => val.Equals(item));
+            value = Array.FindIndex(array, val => val.Equals(item));
             return value != -1;
         }
 
@@ -135,7 +164,7 @@ namespace Gamegaard.Utils.Runtime
         /// <returns>O índice do primeiro elemento igual ao item especificado, ou -1 se o item não for encontrado.</returns>
         public static int FindIndex<T>(this T[] array, T item)
         {
-            return System.Array.FindIndex(array, val => val.Equals(item));
+            return Array.FindIndex(array, val => val.Equals(item));
         }
     }
 }
