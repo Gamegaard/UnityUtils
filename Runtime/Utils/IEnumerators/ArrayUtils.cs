@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using Random = System.Random;
 
-namespace Gamegaard.Utils.Runtime
+namespace Gamegaard.Utils
 {
     public static class ArrayUtils
     {
@@ -13,30 +13,43 @@ namespace Gamegaard.Utils.Runtime
         /// Retorna um elemento aleatório do array.
         /// </summary>
         /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sequence">Array de elementos</param>
+        /// <param name="sourceArray">Array de elementos</param>
         /// <returns>elemento aleatório do array</returns>
-        public static T GetRandom<T>(this T[] sequence)
+        public static T GetRandom<T>(this T[] sourceArray)
         {
-            return sequence.Length > 0 ? sequence[UnityEngine.Random.Range(0, sequence.Length)] : default;
+            return sourceArray.Length > 0 ? sourceArray[UnityEngine.Random.Range(0, sourceArray.Length)] : default;
+        }
+
+        /// <summary>
+        /// Retorna um elemento aleatório do array, ignorando os elementos desejados
+        /// </summary>
+        /// <typeparam name="T">Tipo genérico</typeparam>
+        /// <param name="sourceArray">Array de elementos</param>
+        /// <param name="dataValues">Coleção de valores a serem excluídos</param>
+        /// <returns>elemento aleatório do array</returns>
+        public static T GetRandomExcept<T>(this T[] sourceArray, IEnumerable<T> dataValues)
+        {
+            T[] valuesExcept = sourceArray.Except(dataValues).ToArray();
+            return valuesExcept.GetRandom();
         }
 
         /// <summary>
         /// Obtém uma quantidade aleatória de elementos de um array.
         /// </summary>
         /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sequence">Array de elementos</param>
+        /// <param name="sourceArray">Array de elementos</param>
         /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos</param>
         /// <param name="allowDuplicates">Indica se permite valores duplicados</param>
         /// <returns>Array de elementos aleatórios</returns>
-        public static T[] GetRandomAmount<T>(this T[] sequence, int amount, bool allowDuplicates = false)
+        public static T[] GetRandomAmount<T>(this T[] sourceArray, int amount, bool allowDuplicates = false)
         {
-            if (sequence == null || amount <= 0)
+            if (sourceArray == null || amount <= 0)
             {
                 return Array.Empty<T>();
             }
 
             Random rnd = new Random();
-            List<T> shuffledList = sequence.OrderBy(x => rnd.Next()).ToList();
+            List<T> shuffledList = sourceArray.OrderBy(x => rnd.Next()).ToList();
 
             if (!allowDuplicates && shuffledList.Count <= amount)
             {
@@ -134,24 +147,24 @@ namespace Gamegaard.Utils.Runtime
         /// Calcula o comprimento de um array menos 1, garantindo que o resultado não seja menor que 0.
         /// </summary>
         /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sequence">Array cujo comprimento será calculado</param>
+        /// <param name="sourceArray">Array cujo comprimento será calculado</param>
         /// <returns>Comprimento do array menos 1, não negativo</returns>
-        public static int LengthLessOne<T>(this T[] sequence)
+        public static int LengthLessOne<T>(this T[] sourceArray)
         {
-            return (int)Mathf.Clamp(sequence.Length - 1, 0, float.MaxValue);
+            return (int)Mathf.Clamp(sourceArray.Length - 1, 0, float.MaxValue);
         }
 
         /// <summary>
         /// Encontra o índice de um item em um array genérico.
         /// </summary>
         /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="array">Array genérico em que o item será procurado</param>
+        /// <param name="sourceArray">Array genérico em que o item será procurado</param>
         /// <param name="item">Item a ser procurado no array</param>
         /// <param name="value">Índice do item encontrado</param>
         /// <returns>Retorna verdadeiro se o item for encontrado no array, falso caso contrário</returns>
-        public static bool FindIndex<T>(this T[] array, T item, out int value)
+        public static bool FindIndex<T>(this T[] sourceArray, T item, out int value)
         {
-            value = Array.FindIndex(array, val => val.Equals(item));
+            value = Array.FindIndex(sourceArray, val => val.Equals(item));
             return value != -1;
         }
 
@@ -159,12 +172,24 @@ namespace Gamegaard.Utils.Runtime
         /// Esta extensão retorna o índice do primeiro elemento na array que é igual ao item especificado.
         /// </summary>
         /// <typeparam name="T">O tipo de elementos da array</typeparam>
-        /// <param name="array">A array na qual será feita a busca</param>
+        /// <param name="sourceArray">A array na qual será feita a busca</param>
         /// <param name="item">O item que será procurado</param>
         /// <returns>O índice do primeiro elemento igual ao item especificado, ou -1 se o item não for encontrado.</returns>
-        public static int FindIndex<T>(this T[] array, T item)
+        public static int FindIndex<T>(this T[] sourceArray, T item)
         {
-            return Array.FindIndex(array, val => val.Equals(item));
+            return Array.FindIndex(sourceArray, val => val.Equals(item));
+        }
+
+        /// <summary>
+        /// Ordena uma lista de forma aleatória.
+        /// </summary>
+        /// <typeparam name="T">Tipo genérico da lista.</typeparam>
+        /// <param name="sourceArray">Array a ser embaralhado.</param>
+        /// <returns>Retorna uma nova lista com os elementos embaralhados.</returns>
+        public static T[] ShuffledOrder<T>(this T[] sourceArray)
+        {
+            Random random = new Random();
+            return sourceArray.OrderBy(x => random.Next()).ToArray();
         }
     }
 }

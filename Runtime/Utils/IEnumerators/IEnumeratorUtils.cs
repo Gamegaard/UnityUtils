@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace Gamegaard.Utils.Runtime
+namespace Gamegaard.Utils
 {
     public static class IEnumeratorUtils
     {
@@ -10,14 +10,14 @@ namespace Gamegaard.Utils.Runtime
         /// Obtém uma quantidade aleatória de elementos de uma sequência limitado pelo seu tamanho.
         /// </summary>
         /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sequence">Sequência de elementos</param>
+        /// <param name="sourceSequence">Sequência de elementos</param>
         /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos</param>
         /// <returns>Sequência de elementos aleatórios</returns>
-        public static IEnumerable<T> GetRandomAmount<T>(this IEnumerable<T> sequence, int amount)
+        public static IEnumerable<T> GetRandomAmount<T>(this IEnumerable<T> sourceSequence, int amount)
         {
             System.Random rnd = new System.Random();
             int realAmount;
-            int count = sequence.Count();
+            int count = sourceSequence.Count();
             if (count < amount)
             {
                 realAmount = count;
@@ -28,7 +28,7 @@ namespace Gamegaard.Utils.Runtime
                 realAmount = amount;
             }
 
-            return (count > 0) ? sequence.OrderBy(x => rnd.Next()).Take(realAmount).ToList() : default;
+            return (count > 0) ? sourceSequence.OrderBy(x => rnd.Next()).Take(realAmount).ToList() : default;
         }
 
         /// <summary>

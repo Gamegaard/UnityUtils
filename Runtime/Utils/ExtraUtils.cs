@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Gamegaard.Utils.Runtime
+namespace Gamegaard.Utils
 {
     public static class ExtraUtils
     {

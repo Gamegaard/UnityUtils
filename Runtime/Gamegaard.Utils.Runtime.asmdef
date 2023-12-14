@@ -1,6 +1,6 @@
 {
-    "name": "Gamegaard.Utils.Runtime.Utils.Runtime",
-    "rootNamespace": "Gamegaard.Utils.Runtime",
+    "name": "Gamegaard.Utils.Utils",
+    "rootNamespace": "Gamegaard.Utils",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

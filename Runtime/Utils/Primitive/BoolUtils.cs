@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-namespace Gamegaard.Utils.Runtime
+namespace Gamegaard.Utils
 {
     public static class BoolUtils
     {
