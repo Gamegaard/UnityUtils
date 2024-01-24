@@ -8,7 +8,37 @@ using Random = System.Random;
 namespace Gamegaard.Utils
 {
     public static class ArrayUtils
-    {      
+    {
+        public static T[] GetComponents<T>(this GameObject[] sourceList) where T : Component
+        {
+            List<T> components = new List<T>();
+
+            foreach (GameObject t in sourceList)
+            {
+                if (t.TryGetComponent(out T component))
+                {
+                    components.Add(component);
+                }
+            }
+
+            return components.ToArray();
+        }
+
+        public static G[] GetComponents<T, G>(this T[] sourceList) where T : Component where G : Component
+        {
+            List<G> components = new List<G>();
+
+            foreach (T t in sourceList)
+            {
+                if (t.TryGetComponent(out G component))
+                {
+                    components.Add(component);
+                }
+            }
+
+            return components.ToArray();
+        }
+
         /// <summary>
         /// Obtém uma quantidade aleatória de elementos de um array.
         /// </summary>

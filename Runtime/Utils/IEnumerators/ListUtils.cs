@@ -6,6 +6,36 @@ namespace Gamegaard.Utils
 {
     public static class ListUtils
     {
+        public static List<T> GetComponents<T>(this List<GameObject> sourceList) where T : Component
+        {
+            List<T> components = new List<T>();
+
+            foreach (GameObject t in sourceList)
+            {
+                if (t.TryGetComponent(out T component))
+                {
+                    components.Add(component);
+                }
+            }
+
+            return components;
+        }
+
+        public static List<G> GetComponents<T, G>(this List<T> sourceList) where T : Component where G : Component
+        {
+            List<G> components = new List<G>();
+
+            foreach (T t in sourceList)
+            {
+                if (t.TryGetComponent(out G component))
+                {
+                    components.Add(component);
+                }
+            }
+
+            return components;
+        }
+
         #region List
         /// <summary>
         /// Obtém uma quantidade aleatória de elementos de uma lista.
