@@ -8,17 +8,6 @@ namespace Gamegaard.Utils
     {
         #region List
         /// <summary>
-        /// Obtém um elemento aleatório de uma lista.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sourceList">Lista de elementos</param>
-        /// <returns>Retorna um elemento aleatório da lista ou o valor padrão do tipo T se estiver vazia.</returns>
-        public static T GetRandom<T>(this List<T> sourceList)
-        {
-            return sourceList.Count > 0 ? sourceList[Random.Range(0, sourceList.Count)] : default;
-        }
-
-        /// <summary>
         /// Obtém uma quantidade aleatória de elementos de uma lista.
         /// </summary>
         /// <typeparam name="T">Tipo genérico</typeparam>
@@ -32,10 +21,10 @@ namespace Gamegaard.Utils
             if (sourceList.Count < amount)
             {
                 realAmount = sourceList.Count;
+                Debug.LogWarning("GetRandom with reduced amount. The list has less elements than required.");
             }
             else
             {
-                Debug.LogWarning("GetRandom with reduced amount. The list has less elements than required.");
                 realAmount = amount;
             }
 

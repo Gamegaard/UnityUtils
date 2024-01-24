@@ -1,9 +1,25 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace Gamegaard.Utils
 {
     public static class TransformUtils
     {
+        /// <summary>
+        /// Define o objeto para a layer desejada, inluindo seus filhos.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="layer"></param>
+        public static void SetAllChildrenLayer(Transform parent, int layer)
+        {
+            parent.gameObject.layer = layer;
+            foreach (Transform trans in parent)
+            {
+                SetAllChildrenLayer(trans, layer);
+            }
+        }
+
         /// <summary>
         /// Resseta a posiçao, rotaçao e escala para o valor padrao.
         /// </summary>
@@ -22,6 +38,18 @@ namespace Gamegaard.Utils
             for (int i = parent.childCount - 1; i >= 0; i--)
             {
                 Object.Destroy(parent.GetChild(i).gameObject);
+            }
+        }
+
+        /// <summary>
+        /// Destroi todos os objetos filhos, ignorando aqueles com os nomes desejados.
+        /// </summary>
+        public static void DestroyChildren(Transform parent, params string[] ignoreArr)
+        {
+            foreach (Transform transform in parent)
+            {
+                if (ignoreArr.Contains(transform.name)) continue;
+                Object.Destroy(transform.gameObject);
             }
         }
 

@@ -8,31 +8,7 @@ using Random = System.Random;
 namespace Gamegaard.Utils
 {
     public static class ArrayUtils
-    {
-        /// <summary>
-        /// Retorna um elemento aleatório do array.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sourceArray">Array de elementos</param>
-        /// <returns>elemento aleatório do array</returns>
-        public static T GetRandom<T>(this T[] sourceArray)
-        {
-            return sourceArray.Length > 0 ? sourceArray[UnityEngine.Random.Range(0, sourceArray.Length)] : default;
-        }
-
-        /// <summary>
-        /// Retorna um elemento aleatório do array, ignorando os elementos desejados
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sourceArray">Array de elementos</param>
-        /// <param name="dataValues">Coleção de valores a serem excluídos</param>
-        /// <returns>elemento aleatório do array</returns>
-        public static T GetRandomExcept<T>(this T[] sourceArray, IEnumerable<T> dataValues)
-        {
-            T[] valuesExcept = sourceArray.Except(dataValues).ToArray();
-            return valuesExcept.GetRandom();
-        }
-
+    {      
         /// <summary>
         /// Obtém uma quantidade aleatória de elementos de um array.
         /// </summary>
