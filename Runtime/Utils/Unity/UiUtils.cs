@@ -2,29 +2,15 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public static class UiUtils
+namespace Gamegaard.Utils
 {
-    private static Camera _mainCamera;
-    public static Camera MainCamera => _mainCamera ?? (_mainCamera = Camera.main);
-    public static Vector2 MousePos { get => MainCamera.ScreenToWorldPoint(Input.mousePosition); }
-
-    public static bool IsOverUI()
+    public static class UiUtils
     {
-        PointerEventData pointerData = new(EventSystem.current)
-        {
-            position = Input.mousePosition,
-            pointerId = -1,
-        };
+        private static Camera _mainCamera;
+        public static Camera MainCamera => _mainCamera ?? (_mainCamera = Camera.main);
+        public static Vector2 MousePos { get => MainCamera.ScreenToWorldPoint(Input.mousePosition); }
 
-        List<RaycastResult> results = new();
-        EventSystem.current.RaycastAll(pointerData, results);
-        return results.Count > 0;
-    }
-
-    public static bool IsOverUI(string tag)
-    {
-        bool isOverTaggedElement = false;
-        if (EventSystem.current.IsPointerOverGameObject())
+        public static bool IsOverUI()
         {
             PointerEventData pointerData = new(EventSystem.current)
             {
@@ -34,22 +20,39 @@ public static class UiUtils
 
             List<RaycastResult> results = new();
             EventSystem.current.RaycastAll(pointerData, results);
+            return results.Count > 0;
+        }
 
-            if (results.Count > 0)
+        public static bool IsOverUI(string tag)
+        {
+            bool isOverTaggedElement = false;
+            if (EventSystem.current.IsPointerOverGameObject())
             {
-                for (int i = 0; i < results.Count; ++i)
+                PointerEventData pointerData = new(EventSystem.current)
                 {
-                    if (results[i].gameObject.CompareTag(tag))
-                        isOverTaggedElement = true;
+                    position = Input.mousePosition,
+                    pointerId = -1,
+                };
+
+                List<RaycastResult> results = new();
+                EventSystem.current.RaycastAll(pointerData, results);
+
+                if (results.Count > 0)
+                {
+                    for (int i = 0; i < results.Count; ++i)
+                    {
+                        if (results[i].gameObject.CompareTag(tag))
+                            isOverTaggedElement = true;
+                    }
                 }
             }
+            return isOverTaggedElement;
         }
-        return isOverTaggedElement;
-    }
 
-    public static Vector2 GetCanvasElementWorldPosition(RectTransform element)
-    {
-        RectTransformUtility.ScreenPointToWorldPointInRectangle(element, element.position, MainCamera, out var result);
-        return result;
+        public static Vector2 GetCanvasElementWorldPosition(RectTransform element)
+        {
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(element, element.position, MainCamera, out var result);
+            return result;
+        }
     }
 }
