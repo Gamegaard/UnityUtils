@@ -11,7 +11,7 @@ namespace Gamegaard.Utils
         /// </summary>
         /// <param name="parent"></param>
         /// <param name="layer"></param>
-        public static void SetAllChildrenLayer(Transform parent, int layer)
+        public static void SetAllChildrenLayer(this Transform parent, int layer)
         {
             parent.gameObject.layer = layer;
             foreach (Transform trans in parent)
