@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -144,6 +145,40 @@ namespace Gamegaard.Utils
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Searches for components of type T only among the direct children of the object.
+        /// </summary>
+        /// <typeparam name="T">The type of the components to search for.</typeparam>
+        /// <param name="parent">The parent object whose direct children will be checked.</param>
+        /// <returns>An IEnumerable of components of type T found among the direct children.</returns>
+        public static IEnumerable<T> GetComponentsInDirectChildren<T>(this GameObject parent) where T : Component
+        {
+            foreach (Transform child in parent.transform)
+            {
+                if (child.TryGetComponent(out T component))
+                {
+                    yield return component;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Searches for components of type T only among the direct children of the object and adds them to a provided list.
+        /// </summary>
+        /// <typeparam name="T">The type of the components to search for.</typeparam>
+        /// <param name="parent">The parent object whose direct children will be checked.</param>
+        /// <param name="results">The list to which the components will be added.</param>
+        public static void GetComponentsInDirectChildren<T>(this GameObject parent, List<T> results) where T : Component
+        {
+            foreach (Transform child in parent.transform)
+            {
+                if (child.TryGetComponent(out T component))
+                {
+                    results.Add(component);
+                }
+            }
         }
     }
 }
