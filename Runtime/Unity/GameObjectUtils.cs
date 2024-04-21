@@ -126,5 +126,24 @@ namespace Gamegaard.Utils
             return null;        
 #endif
         }
+
+        /// <summary>
+        /// Searches for a component of type T only among the direct children of the object.
+        /// </summary>
+        /// <typeparam name="T">The type of the component to search for.</typeparam>
+        /// <param name="parent">The parent object whose direct children will be checked.</param>
+        /// <returns>The first component of type T found, or null if none is found.</returns>
+        public static T GetComponentInDirectChildren<T>(this GameObject parent) where T : Component
+        {
+            foreach (Transform child in parent.transform)
+            {
+                T component = child.GetComponent<T>();
+                if (component != null)
+                {
+                    return component;
+                }
+            }
+            return null;
+        }
     }
 }
