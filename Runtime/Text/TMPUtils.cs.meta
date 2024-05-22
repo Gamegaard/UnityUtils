@@ -1,5 +1,7 @@
 fileFormatVersion: 2
 guid: 2544760ca8b164e47807c80f29268772
+labels:
+- Script
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
