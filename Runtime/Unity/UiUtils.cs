@@ -10,11 +10,12 @@ namespace Gamegaard.Utils
         public static Camera MainCamera => _mainCamera ?? (_mainCamera = Camera.main);
         public static Vector2 MousePos { get => MainCamera.ScreenToWorldPoint(Input.mousePosition); }
 
-        public static bool IsOverUI()
+        public static bool IsOverUI(Vector2 inputPosition)
         {
+            if (EventSystem.current == null) return false;
             PointerEventData pointerData = new(EventSystem.current)
             {
-                position = Input.mousePosition,
+                position = inputPosition,
                 pointerId = -1,
             };
 
@@ -23,14 +24,15 @@ namespace Gamegaard.Utils
             return results.Count > 0;
         }
 
-        public static bool IsOverUI(string tag)
+        public static bool IsOverUI(Vector2 inputPosition, string tag)
         {
+            if (EventSystem.current == null) return false;
             bool isOverTaggedElement = false;
             if (EventSystem.current.IsPointerOverGameObject())
             {
                 PointerEventData pointerData = new(EventSystem.current)
                 {
-                    position = Input.mousePosition,
+                    position = inputPosition,
                     pointerId = -1,
                 };
 
@@ -47,6 +49,16 @@ namespace Gamegaard.Utils
                 }
             }
             return isOverTaggedElement;
+        }
+
+        public static bool IsOverUI(string tag)
+        {
+            return IsOverUI(Input.mousePosition, tag);
+        }
+
+        public static bool IsOverUI()
+        {
+            return IsOverUI(Input.mousePosition);
         }
 
         public static Vector2 GetCanvasElementWorldPosition(RectTransform element)

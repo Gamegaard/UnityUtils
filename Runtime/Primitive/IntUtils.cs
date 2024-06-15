@@ -27,5 +27,17 @@ namespace Gamegaard.Utils
         {
             return value *= GetRandomSign();
         }
+
+        /// <summary>
+        /// Retorna em porcentagem o quanto o valor atual vale entre um valor minimo e maximo.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="minValue"></param>
+        /// <param name="maxValue"></param>
+        /// <returns></returns>
+        public static float PercentBtweenValues(int value, int minValue, int maxValue)
+        {
+            return (value - (float)minValue) / (maxValue - (float)minValue);
+        }
     }
 }

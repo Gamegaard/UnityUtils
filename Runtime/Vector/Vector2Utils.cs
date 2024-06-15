@@ -74,6 +74,20 @@ namespace Gamegaard.Utils
         {
             return RadianToVector2(degree * Mathf.Deg2Rad);
         }
+
+        public static Vector2 ProjectOnLine(Vector2 point, Vector2 lineStart, Vector2 lineEnd)
+        {
+            Vector2 lineDirection = lineEnd - lineStart;
+            Vector2 pointDirection = point - lineStart;
+
+            float t = Vector2.Dot(pointDirection, lineDirection) / Vector2.Dot(lineDirection, lineDirection);
+
+            t = Mathf.Clamp01(t);
+
+            Vector2 projectedPos = lineStart + t * lineDirection;
+
+            return projectedPos;
+        }
         #endregion
 
         #region Extensions
