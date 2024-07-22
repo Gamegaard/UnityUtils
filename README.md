@@ -1,2 +1,2 @@
 # UnityUtils
-Downloaded from: https://github.com/KaijotaDev/UnityUtils.git
+Downloaded from: https://github.com/Gamegaard/UnityUtils.git
