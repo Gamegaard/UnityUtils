@@ -57,7 +57,7 @@ namespace Gamegaard.Utils
             Random rnd = new Random();
             List<T> shuffledList = sourceArray.OrderBy(x => rnd.Next()).ToList();
 
-            if (!allowDuplicates && shuffledList.Count <= amount)
+            if (!allowDuplicates && shuffledList.Count < amount)
             {
                 Debug.LogWarning("GetRandom with reduced amount. The list has fewer elements than required.");
                 amount = shuffledList.Count;
