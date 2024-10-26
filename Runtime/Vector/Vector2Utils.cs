@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Gamegaard.Utils
 {
@@ -87,6 +88,21 @@ namespace Gamegaard.Utils
             Vector2 projectedPos = lineStart + t * lineDirection;
 
             return projectedPos;
+        }
+
+        public static Vector2 GetRandomPositionInCircle(float min, float max)
+        {
+            Vector2 randomPoint = Random.insideUnitCircle * Random.Range(min, max);
+            return randomPoint;
+        }
+
+        public static Vector2 GetRandomPositionInCircle(Vector2 min, Vector2 max)
+        {
+            Vector2 randomPoint = Random.insideUnitCircle;
+            float randomX = Mathf.Lerp(min.x, max.x, (randomPoint.x + 1) / 2);
+            float randomY = Mathf.Lerp(min.y, max.y, (randomPoint.y + 1) / 2);
+
+            return new Vector2(randomX, randomY);
         }
         #endregion
 
