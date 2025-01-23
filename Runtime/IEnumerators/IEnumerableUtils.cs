@@ -122,7 +122,7 @@ namespace Gamegaard.Utils
         /// <param name="a">Sequência de componentes</param>
         public static void DestroyAllComponents<T>(this IEnumerable<T> sequence) where T : Component
         {
-            foreach (var component in sequence)
+            foreach (T component in sequence)
             {
                 Object.Destroy(component);
             }
@@ -135,7 +135,7 @@ namespace Gamegaard.Utils
         /// <param name="a">Sequência de componentes</param>
         public static void DestroyAllGameObjects<T>(this IEnumerable<T> sequence) where T : Component
         {
-            foreach (var component in sequence)
+            foreach (T component in sequence)
             {
                 Object.Destroy(component.gameObject);
             }
@@ -148,7 +148,7 @@ namespace Gamegaard.Utils
         /// <param name="a">Sequência de componentes</param>
         public static void DestroyAllGameObjects(this IEnumerable<GameObject> sequence)
         {
-            foreach (var gameObject in sequence)
+            foreach (GameObject gameObject in sequence)
             {
                 Object.Destroy(gameObject);
             }

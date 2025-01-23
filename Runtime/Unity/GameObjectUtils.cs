@@ -33,8 +33,9 @@ namespace Gamegaard.Utils
         /// </summary>
         public static bool IsAlive(this object aObj)
         {
-            Object unityObj = aObj as Object;
-            return unityObj != null;
+            if (aObj == null) return false;
+
+            return aObj as Object != null;
         }
 
         /// <summary>
@@ -179,6 +180,124 @@ namespace Gamegaard.Utils
                     results.Add(component);
                 }
             }
+        }
+
+        public static T GetComponentInDirectChildren<T>(this Transform transform, string childrenName) where T : Component
+        {
+            foreach (Transform child in transform)
+            {
+                if (child.name.Equals(childrenName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (child.TryGetComponent(out T slotView))
+                    {
+                        return slotView;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public static T GetComponentInChildrenRecursive<T>(this Transform transform, string childrenName) where T : Component
+        {
+            foreach (Transform child in transform)
+            {
+                if (child.name.Equals(childrenName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (child.TryGetComponent(out T component))
+                    {
+                        return component;
+                    }
+                }
+
+                T result = child.GetComponentInChildrenRecursive<T>(childrenName);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        public static T GetComponentInParents<T>(this Transform transform, string parentName) where T : Component
+        {
+            Transform current = transform.parent;
+
+            while (current != null)
+            {
+                if (current.name.Equals(parentName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (current.TryGetComponent(out T component))
+                    {
+                        return component;
+                    }
+                }
+
+                current = current.parent;
+            }
+
+            return null;
+        }
+
+        public static bool TryGetComponentInDirectChildren<T>(this Transform transform, string childrenName, out T component) where T : Component
+        {
+            foreach (Transform child in transform)
+            {
+                if (child.name.Equals(childrenName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (child.TryGetComponent(out component))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            component = null;
+            return false;
+        }
+
+        public static bool TryGetComponentInChildren<T>(this Transform transform, string childrenName, out T component) where T : Component
+        {
+            foreach (Transform child in transform)
+            {
+                if (child.name.Equals(childrenName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (child.TryGetComponent(out component))
+                    {
+                        return true;
+                    }
+                }
+
+                if (child.TryGetComponentInChildren(childrenName, out component))
+                {
+                    return true;
+                }
+            }
+
+            component = null;
+            return false;
+        }
+
+        public static bool TryGetComponentInParents<T>(this Transform transform, string parentName, out T component) where T : Component
+        {
+            Transform current = transform.parent;
+
+            while (current != null)
+            {
+                if (current.name.Equals(parentName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (current.TryGetComponent(out component))
+                    {
+                        return true;
+                    }
+                }
+
+                current = current.parent;
+            }
+
+            component = null;
+            return false;
         }
     }
 }
