@@ -198,7 +198,7 @@ namespace Gamegaard.Utils
             return null;
         }
 
-        public static T GetComponentInChildrenRecursive<T>(this Transform transform, string childrenName) where T : Component
+        public static T GetComponentInChildren<T>(this Transform transform, string childrenName) where T : Component
         {
             foreach (Transform child in transform)
             {
@@ -210,7 +210,7 @@ namespace Gamegaard.Utils
                     }
                 }
 
-                T result = child.GetComponentInChildrenRecursive<T>(childrenName);
+                T result = child.GetComponentInChildren<T>(childrenName);
                 if (result != null)
                 {
                     return result;
