@@ -1,7 +1,9 @@
 {
     "name": "Gamegaard.Utils.Utils.Editor",
     "rootNamespace": "Gamegaard.Utils.Editor",
-    "references": [],
+    "references": [
+        "GUID:35e6c7e43a449aa47a0c844c3e8d90e8"
+    ],
     "includePlatforms": [
         "Editor"
     ],
