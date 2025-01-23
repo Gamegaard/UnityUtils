@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -44,21 +45,79 @@ namespace Gamegaard.Utils
         /// <param name="sourceList">Lista de elementos</param>
         /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos</param>
         /// <returns>Retorna uma lista de elementos aleatórios</returns>
-        public static List<T> GetRandomAmount<T>(this List<T> sourceList, int amount)
+        public static List<T> GetRandomAmount<T>(this List<T> sourceList, int amount, bool allowDuplicates = false)
         {
-            System.Random rnd = new System.Random();
-            int realAmount;
-            if (sourceList.Count < amount)
+            if (sourceList == null || amount <= 0)
             {
-                realAmount = sourceList.Count;
-                Debug.LogWarning("GetRandom with reduced amount. The list has less elements than required.");
-            }
-            else
-            {
-                realAmount = amount;
+                return new List<T>();
             }
 
-            return (sourceList.Count > 0) ? sourceList.OrderBy(x => rnd.Next()).Take(realAmount).ToList() : default;
+            System.Random rnd = new System.Random();
+            List<T> shuffledList = sourceList.OrderBy(x => rnd.Next()).ToList();
+
+            if (!allowDuplicates && shuffledList.Count < amount)
+            {
+                Debug.LogWarning("GetRandom with reduced amount. The list has fewer elements than required.");
+                amount = shuffledList.Count;
+            }
+
+            HashSet<T> selectedSet = new HashSet<T>();
+            List<T> selectedItems = new List<T>();
+
+            while (selectedItems.Count < amount)
+            {
+                int index = rnd.Next(shuffledList.Count);
+                T selectedItem = shuffledList[index];
+
+                if (allowDuplicates || selectedSet.Add(selectedItem))
+                {
+                    selectedItems.Add(selectedItem);
+                }
+            }
+
+            return selectedItems;
+        }
+
+        public static List<T> GetRandomAmount<T>(this List<T> sourceList, int numberOfItems, Func<T, bool> criteria, bool allowDuplicates = false)
+        {
+            List<T> selectedItems = new List<T>();
+            List<T> matchingItems = sourceList.Where(item => criteria(item)).ToList();
+
+            int remainingItemsCount = numberOfItems;
+
+            if (allowDuplicates)
+            {
+                selectedItems.AddRange(matchingItems);
+                remainingItemsCount -= matchingItems.Count;
+            }
+
+            List<T> remainingItems = matchingItems.ToList();
+            System.Random random = new System.Random();
+
+            while (remainingItemsCount > 0 && remainingItems.Count > 0)
+            {
+                int next = random.Next(remainingItems.Count);
+                selectedItems.Add(remainingItems[next]);
+                remainingItemsCount--;
+                if (!allowDuplicates)
+                {
+                    remainingItems.RemoveAt(next);
+                }
+            }
+
+            return selectedItems;
+        }
+
+        public static List<T> GetRandomIntersect<T>(this List<T> sourceList, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
+        {
+            List<T> intersectedValues = sourceList.Intersect(dataValues).ToList();
+            return intersectedValues.GetRandomAmount(amount, allowDuplicates);
+        }
+
+        public static List<T> GetRandomExcept<T>(this List<T> sourceList, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
+        {
+            List<T> valuesExcept = sourceList.Except(dataValues).ToList();
+            return valuesExcept.GetRandomAmount(amount, allowDuplicates);
         }
 
         /// <summary>
