@@ -33,9 +33,7 @@ namespace Gamegaard.Utils
         /// </summary>
         public static bool IsAlive(this object aObj)
         {
-            if (aObj == null) return false;
-
-            return aObj as Object != null;
+            return aObj != null || aObj as Object != null;
         }
 
         /// <summary>
