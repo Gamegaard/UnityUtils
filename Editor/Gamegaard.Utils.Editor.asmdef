@@ -1,5 +1,5 @@
 {
-    "name": "Gamegaard.Utils.Utils.Editor",
+    "name": "Gamegaard.Utils.Editor",
     "rootNamespace": "Gamegaard.Utils.Editor",
     "references": [],
     "includePlatforms": [

@@ -1,7 +1,9 @@
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
-namespace Gamegaard.Utils.Editor
+namespace Gamegaard.Utils
 {
     public static class GizmosUtils
     {
@@ -30,7 +32,9 @@ namespace Gamegaard.Utils.Editor
             style.alignment = TextAnchor.MiddleCenter;
             style.fontSize = fontSize;
 
+#if UNITY_EDITOR
             Handles.Label(position, text, style);
+#endif
         }
 
         public static void DrawCircle(Vector3 center, float radius, Color color, int segments = 20)
