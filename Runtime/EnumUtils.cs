@@ -11,7 +11,7 @@ namespace Gamegaard.Utils
             return (T)enumValues.GetValue(randomIndex);
         }
 
-        public static T GetRandomEnumValue<T>(Action<T> condition) where T : Enum
+        public static T GetRandomEnumValue<T>(Func<T, bool> condition) where T : Enum
         {
             Array enumValues = Enum.GetValues(typeof(T));
             int randomIndex;
@@ -27,15 +27,14 @@ namespace Gamegaard.Utils
             return randomEnumValue;
         }
 
-        private static bool IsValid<T>(T value, Action<T> condition) where T : Enum
+        private static bool IsValid<T>(T value, Func<T, bool> condition) where T : Enum
         {
             if (condition == null)
             {
                 return true;
             }
 
-            condition.Invoke(value);
-            return true;
+            return condition.Invoke(value);
         }
 
         public static T[] GetRandomEnumValueAmount<T>(int amount) where T : Enum
@@ -48,7 +47,7 @@ namespace Gamegaard.Utils
             return enumElements;
         }
 
-        public static T[] GetRandomEnumValueAmount<T>(int amount, Action<T> condition) where T : Enum
+        public static T[] GetRandomEnumValueAmount<T>(int amount, Func<T, bool> condition) where T : Enum
         {
             T[] enumElements = new T[amount];
             for (int i = 0; i < amount; i++)
