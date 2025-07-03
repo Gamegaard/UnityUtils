@@ -123,6 +123,18 @@ namespace Gamegaard.Utils
             Gizmos.matrix = originalMatrix;
         }
 
+        public static void DrawSolidPolygon(Vector3[] vertices)
+        {
+            if (vertices.Length < 3) return;
+
+            for (int i = 1; i < vertices.Length - 1; i++)
+            {
+                Gizmos.DrawLine(vertices[0], vertices[i]);
+                Gizmos.DrawLine(vertices[i], vertices[i + 1]);
+                Gizmos.DrawLine(vertices[i + 1], vertices[0]);
+            }
+        }
+
         public static void DrawThickLine(Vector3 start, Vector3 end, float thickness)
         {
 #if UNITY_EDITOR
