@@ -42,7 +42,7 @@ namespace Gamegaard
 
         protected virtual void OnDrawGizmos()
         {
-            if (showAlways)
+            if (showAlways && enabled)
             {
                 DrawGizmos();
             }
@@ -50,7 +50,7 @@ namespace Gamegaard
 
         protected virtual void OnDrawGizmosSelected()
         {
-            if (!showAlways)
+            if (!showAlways && enabled)
             {
                 DrawGizmos();
             }
