@@ -12,20 +12,24 @@ namespace Gamegaard.Utils
 
         public static bool IsOverUI(Vector2 inputPosition)
         {
-            if (EventSystem.current == null) return false;
-            PointerEventData pointerData = new(EventSystem.current)
+            EventSystem eventSystem = EventSystem.current;
+
+            if (eventSystem == null) return false;
+            PointerEventData pointerData = new(eventSystem)
             {
                 position = inputPosition,
                 pointerId = -1,
             };
 
             List<RaycastResult> results = new();
-            EventSystem.current.RaycastAll(pointerData, results);
+            eventSystem.RaycastAll(pointerData, results);
             return results.Count > 0;
         }
 
         public static bool IsOverUI(Vector2 inputPosition, string tag)
         {
+            EventSystem eventSystem = EventSystem.current;
+
             if (EventSystem.current == null) return false;
             bool isOverTaggedElement = false;
             if (EventSystem.current.IsPointerOverGameObject())

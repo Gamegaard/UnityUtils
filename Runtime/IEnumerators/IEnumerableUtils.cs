@@ -41,6 +41,21 @@ namespace Gamegaard.Utils
             return filteredObjects;
         }
 
+        public static IEnumerable<T> GetShuffled<T>(this IEnumerable<T> source)
+        {
+            System.Random random = new System.Random();
+            T[] array = source as T[] ?? source.ToArray();
+            int n = array.Length;
+
+            for (int i = n - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                (array[i], array[j]) = (array[j], array[i]);
+            }
+
+            return array;
+        }
+
         /// <summary>
         /// Retorna um elemento aleatório de uma coleção.
         /// </summary>
