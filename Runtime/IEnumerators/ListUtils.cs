@@ -7,7 +7,7 @@ namespace Gamegaard.Utils
 {
     public static class ListUtils
     {
-        public static List<T> GetComponents<T>(this List<GameObject> sourceList) where T : Component
+        public static List<T> GetComponents<T>(this IReadOnlyList<GameObject> sourceList) where T : Component
         {
             List<T> components = new List<T>();
 
@@ -22,7 +22,7 @@ namespace Gamegaard.Utils
             return components;
         }
 
-        public static List<G> GetComponents<T, G>(this List<T> sourceList) where T : Component where G : Component
+        public static List<G> GetComponents<T, G>(this IReadOnlyList<T> sourceList) where T : Component where G : Component
         {
             List<G> components = new List<G>();
 
@@ -45,7 +45,7 @@ namespace Gamegaard.Utils
         /// <param name="sourceList">Lista de elementos</param>
         /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos</param>
         /// <returns>Retorna uma lista de elementos aleatórios</returns>
-        public static List<T> GetRandomAmount<T>(this List<T> sourceList, int amount, bool allowDuplicates = false)
+        public static List<T> GetRandomAmount<T>(this IReadOnlyList<T> sourceList, int amount, bool allowDuplicates = false)
         {
             if (sourceList == null || amount <= 0)
             {
@@ -57,7 +57,6 @@ namespace Gamegaard.Utils
 
             if (!allowDuplicates && shuffledList.Count < amount)
             {
-                Debug.LogWarning("GetRandom with reduced amount. The list has fewer elements than required.");
                 amount = shuffledList.Count;
             }
 
@@ -78,7 +77,7 @@ namespace Gamegaard.Utils
             return selectedItems;
         }
 
-        public static List<T> GetRandomAmount<T>(this List<T> sourceList, int numberOfItems, Func<T, bool> criteria, bool allowDuplicates = false)
+        public static List<T> GetRandomAmount<T>(this IReadOnlyList<T> sourceList, int numberOfItems, Func<T, bool> criteria, bool allowDuplicates = false)
         {
             List<T> selectedItems = new List<T>();
             List<T> matchingItems = sourceList.Where(item => criteria(item)).ToList();
@@ -108,13 +107,13 @@ namespace Gamegaard.Utils
             return selectedItems;
         }
 
-        public static List<T> GetRandomIntersect<T>(this List<T> sourceList, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
+        public static List<T> GetRandomIntersect<T>(this IReadOnlyList<T> sourceList, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
         {
             List<T> intersectedValues = sourceList.Intersect(dataValues).ToList();
             return intersectedValues.GetRandomAmount(amount, allowDuplicates);
         }
 
-        public static List<T> GetRandomExcept<T>(this List<T> sourceList, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
+        public static List<T> GetRandomExcept<T>(this IReadOnlyList<T> sourceList, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
         {
             List<T> valuesExcept = sourceList.Except(dataValues).ToList();
             return valuesExcept.GetRandomAmount(amount, allowDuplicates);
@@ -126,9 +125,9 @@ namespace Gamegaard.Utils
         /// <typeparam name="T">O tipo de elemento da lista.</typeparam>
         /// <param name="sourceList">A lista a ser contada.</param>
         /// <returns>Retorna o valor inteiro da contagem da lista menos um, nunca negativo</returns>
-        public static int FinalIndex<T>(this List<T> sourceList)
+        public static int FinalIndex<T>(this IReadOnlyList<T> sourceList)
         {
-            return (int)Mathf.Clamp(sourceList.Count - 1, 0, float.MaxValue);
+            return Mathf.Max(sourceList.Count - 1, 0);
         }
 
         /// <summary>
@@ -159,7 +158,7 @@ namespace Gamegaard.Utils
         /// <typeparam name="T">Tipo genérico da lista.</typeparam>
         /// <param name="sourceList">Lista a ser embaralhada.</param>
         /// <returns>Retorna uma nova lista com os elementos embaralhados.</returns>
-        public static List<T> ShuffledOrder<T>(this List<T> sourceList)
+        public static List<T> ShuffledOrder<T>(this IReadOnlyList<T> sourceList)
         {
             System.Random random = new System.Random();
             return sourceList.OrderBy(x => random.Next()).ToList();

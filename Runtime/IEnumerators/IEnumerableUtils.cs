@@ -15,6 +15,23 @@ namespace Gamegaard.Utils
             targetsInRadius.ProcessElements(action);
         }
 
+        public static bool HasIntersection<T>(this IEnumerable<T> first, IEnumerable<T> second)
+        {
+            if (first == null || second == null) return false;
+
+            HashSet<T> set = new HashSet<T>(first);
+
+            foreach (T element in second)
+            {
+                if (set.Contains(element))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static void ProcessElements<T, G>(this IEnumerable<T> elements, Action<G> action) where T : Component where G : Component
         {
             foreach (T target in elements)
@@ -108,7 +125,6 @@ namespace Gamegaard.Utils
             if (count < amount)
             {
                 realAmount = count;
-                Debug.LogWarning($"GetRandom with reduced amount, from {amount}, to {count}. The list has less elements than required.");
             }
             else
             {

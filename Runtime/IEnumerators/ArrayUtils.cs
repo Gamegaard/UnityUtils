@@ -59,7 +59,6 @@ namespace Gamegaard.Utils
 
             if (!allowDuplicates && shuffledList.Count < amount)
             {
-                Debug.LogWarning("GetRandom with reduced amount. The list has fewer elements than required.");
                 amount = shuffledList.Count;
             }
 

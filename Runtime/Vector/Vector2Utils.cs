@@ -1,11 +1,33 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Gamegaard.Utils
 {
     public static class Vector2Utils
     {
         #region Common
+        /// <summary>
+        /// Returns the angle in radians between 0 and 2π.
+        /// </summary>
+        public static float GetFloatAngleRad(this Vector2 vector)
+        {
+            vector = vector.normalized;
+            float angle = Mathf.Atan2(vector.y, vector.x);
+            if (angle < 0f) angle += Mathf.PI * 2f;
+            return angle;
+        }
+
+        /// <summary>
+        /// Returns the rounded angle in radians between 0 and 2π.
+        /// </summary>
+        public static int GetIntAngleRad(this Vector2 vector)
+        {
+            vector = vector.normalized;
+            float angle = Mathf.Atan2(vector.y, vector.x);
+            if (angle < 0f) angle += Mathf.PI * 2f;
+            int angleInt = Mathf.RoundToInt(angle);
+            return angleInt;
+        }
+
         /// <summary>
         /// Retorna um vetor2 com adiçao de offsets.
         /// </summary>
