@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace Gamegaard.Utils
 {
@@ -57,12 +60,25 @@ namespace Gamegaard.Utils
 
         public static bool IsOverUI(string tag)
         {
-            return IsOverUI(Input.mousePosition, tag);
+            return IsOverUI(GetPointerPosition(), tag);
         }
 
         public static bool IsOverUI()
         {
-            return IsOverUI(Input.mousePosition);
+            return IsOverUI(GetPointerPosition());
+        }
+
+        private static Vector2 GetPointerPosition()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (Mouse.current != null)
+                return Mouse.current.position.ReadValue();
+
+            if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.isPressed)
+                return Touchscreen.current.primaryTouch.position.ReadValue();
+#endif
+
+            return Input.mousePosition;
         }
 
         public static Vector2 GetCanvasElementWorldPosition(RectTransform element)
