@@ -9,53 +9,64 @@ namespace Gamegaard.Utils
 {
     public static class UiUtils
     {
-        private static Camera _mainCamera;
-        public static Camera MainCamera => _mainCamera ?? (_mainCamera = Camera.main);
-        public static Vector2 MousePos { get => MainCamera.ScreenToWorldPoint(Input.mousePosition); }
+        private static Camera cachedMainCamera;
+        private static PointerEventData cachedPointerData;
+        private static readonly List<RaycastResult> raycastResults = new(8);
+
+        public static Camera MainCamera
+        {
+            get
+            {
+                if (cachedMainCamera == null)
+                    cachedMainCamera = Camera.main;
+                return cachedMainCamera;
+            }
+        }
+
+        public static Vector2 MousePos => MainCamera.ScreenToWorldPoint(Input.mousePosition);
 
         public static bool IsOverUI(Vector2 inputPosition)
         {
             EventSystem eventSystem = EventSystem.current;
-
             if (eventSystem == null) return false;
-            PointerEventData pointerData = new(eventSystem)
-            {
-                position = inputPosition,
-                pointerId = -1,
-            };
 
-            List<RaycastResult> results = new();
-            eventSystem.RaycastAll(pointerData, results);
-            return results.Count > 0;
+            if (cachedPointerData == null)
+                cachedPointerData = new PointerEventData(eventSystem);
+            else
+                cachedPointerData.Reset();
+
+            cachedPointerData.position = inputPosition;
+            cachedPointerData.pointerId = -1;
+
+            raycastResults.Clear();
+            eventSystem.RaycastAll(cachedPointerData, raycastResults);
+            return raycastResults.Count > 0;
         }
 
         public static bool IsOverUI(Vector2 inputPosition, string tag)
         {
             EventSystem eventSystem = EventSystem.current;
+            if (eventSystem == null) return false;
+            if (!eventSystem.IsPointerOverGameObject()) return false;
 
-            if (EventSystem.current == null) return false;
-            bool isOverTaggedElement = false;
-            if (EventSystem.current.IsPointerOverGameObject())
+            if (cachedPointerData == null)
+                cachedPointerData = new PointerEventData(eventSystem);
+            else
+                cachedPointerData.Reset();
+
+            cachedPointerData.position = inputPosition;
+            cachedPointerData.pointerId = -1;
+
+            raycastResults.Clear();
+            eventSystem.RaycastAll(cachedPointerData, raycastResults);
+
+            for (int i = 0; i < raycastResults.Count; i++)
             {
-                PointerEventData pointerData = new(EventSystem.current)
-                {
-                    position = inputPosition,
-                    pointerId = -1,
-                };
-
-                List<RaycastResult> results = new();
-                EventSystem.current.RaycastAll(pointerData, results);
-
-                if (results.Count > 0)
-                {
-                    for (int i = 0; i < results.Count; ++i)
-                    {
-                        if (results[i].gameObject.CompareTag(tag))
-                            isOverTaggedElement = true;
-                    }
-                }
+                if (raycastResults[i].gameObject.CompareTag(tag))
+                    return true;
             }
-            return isOverTaggedElement;
+
+            return false;
         }
 
         public static bool IsOverUI(string tag)
@@ -77,7 +88,6 @@ namespace Gamegaard.Utils
             if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.isPressed)
                 return Touchscreen.current.primaryTouch.position.ReadValue();
 #endif
-
             return Input.mousePosition;
         }
 
