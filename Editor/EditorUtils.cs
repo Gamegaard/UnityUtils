@@ -1,11 +1,17 @@
 ﻿#if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Gamegaard.Utils
 {
     public static class EditorUtils
     {
+        public static bool IsPrefabEditor(this GameObject gameObject)
+        {
+            return gameObject.scene.IsValid() && PrefabStageUtility.GetPrefabStage(gameObject) == null && !PrefabUtility.IsPartOfPrefabAsset(gameObject);
+        }
+
         /// <summary>
         /// Finds a component in any prefab in the project.
         /// </summary>

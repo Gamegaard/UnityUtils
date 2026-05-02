@@ -153,7 +153,7 @@ namespace Gamegaard.Utils
         }
 
         /// <summary>
-        /// Ordena uma lista de forma aleatória.
+        /// Ordena uma lista de forma aleatória e retorna uma nova.
         /// </summary>
         /// <typeparam name="T">Tipo genérico da lista.</typeparam>
         /// <param name="sourceList">Lista a ser embaralhada.</param>
@@ -162,6 +162,22 @@ namespace Gamegaard.Utils
         {
             System.Random random = new System.Random();
             return sourceList.OrderBy(x => random.Next()).ToList();
+        }
+
+        /// <summary>
+        /// Ordena uma lista de forma aleatória.
+        /// </summary>
+        /// <typeparam name="T">Tipo genérico da lista.</typeparam>
+        /// <param name="sourceList">Lista a ser embaralhada.</param>
+        public static void Shuffle<T>(this IList<T> list)
+        {
+            System.Random rng = new System.Random();
+            int n = list.Count;
+            while (n > 1)
+            {
+                int k = rng.Next(n--);
+                (list[n], list[k]) = (list[k], list[n]);
+            }
         }
 
         /// <summary>
