@@ -9,7 +9,7 @@ namespace Gamegaard.Utils
         /// </summary>
         public static float ClampFloatToZero(float value)
         {
-            return Mathf.Clamp(value, 0, float.MaxValue);
+            return Mathf.Max(value, 0);
         }
 
         /// <summary>

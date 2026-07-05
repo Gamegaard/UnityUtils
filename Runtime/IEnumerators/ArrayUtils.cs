@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using UnityEngine;
 using Random = System.Random;
@@ -11,190 +10,104 @@ namespace Gamegaard.Utils
     {
         public static T[] GetComponents<T>(this GameObject[] sourceList) where T : Component
         {
-            List<T> components = new List<T>();
-
-            foreach (GameObject t in sourceList)
+            List<T> components = new List<T>(sourceList.Length);
+            foreach (GameObject gameObject in sourceList)
             {
-                if (t.TryGetComponent(out T component))
-                {
+                if (gameObject.TryGetComponent(out T component))
                     components.Add(component);
-                }
             }
-
             return components.ToArray();
         }
 
         public static G[] GetComponents<T, G>(this T[] sourceList) where T : Component where G : Component
         {
-            List<G> components = new List<G>();
-
-            foreach (T t in sourceList)
+            List<G> components = new List<G>(sourceList.Length);
+            foreach (T item in sourceList)
             {
-                if (t.TryGetComponent(out G component))
-                {
+                if (item.TryGetComponent(out G component))
                     components.Add(component);
-                }
             }
-
             return components.ToArray();
         }
 
-        /// <summary>
-        /// Obtém uma quantidade aleatória de elementos de um array.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sourceArray">Array de elementos</param>
-        /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos</param>
-        /// <param name="allowDuplicates">Indica se permite valores duplicados</param>
-        /// <returns>Array de elementos aleatórios</returns>
         public static T[] GetRandomAmount<T>(this T[] sourceArray, int amount, bool allowDuplicates = false)
         {
-            if (sourceArray == null || amount <= 0)
-            {
+            if (sourceArray == null || sourceArray.Length == 0 || amount <= 0)
                 return Array.Empty<T>();
-            }
 
-            Random rnd = new Random();
-            List<T> shuffledList = sourceArray.OrderBy(x => rnd.Next()).ToList();
-
-            if (!allowDuplicates && shuffledList.Count < amount)
-            {
-                amount = shuffledList.Count;
-            }
-
-            HashSet<T> selectedSet = new HashSet<T>();
-            List<T> selectedItems = new List<T>();
-
-            while (selectedItems.Count < amount)
-            {
-                int index = rnd.Next(shuffledList.Count);
-                T selectedItem = shuffledList[index];
-
-                if (allowDuplicates || selectedSet.Add(selectedItem))
-                {
-                    selectedItems.Add(selectedItem);
-                }
-            }
-
-            return selectedItems.ToArray();
-        }
-
-        /// <summary>
-        /// Obtém uma quantidade aleatória de elementos de um array com base em critérios.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sourceArray">Array de elementos de origem</param>
-        /// <param name="numberOfItems">Número de itens a serem obtidos</param>
-        /// <param name="criteria">Critério de seleção</param>
-        /// <param name="allowDuplicates">Indica se permite valores duplicados</param>
-        /// <returns>Array de elementos aleatórios com base nos critérios</returns>
-        public static T[] GetRandomAmount<T>(this T[] sourceArray, int numberOfItems, Func<T, bool> criteria, bool allowDuplicates = false)
-        {
-            List<T> selectedItems = new List<T>();
-            List<T> matchingItems = sourceArray.Where(item => criteria(item)).ToList();
-
-            int remainingItemsCount = numberOfItems;
+            Random random = new Random();
 
             if (allowDuplicates)
             {
-                selectedItems.AddRange(matchingItems);
-                remainingItemsCount -= matchingItems.Count;
+                T[] result = new T[amount];
+                for (int i = 0; i < amount; i++)
+                    result[i] = sourceArray[random.Next(sourceArray.Length)];
+                return result;
             }
 
-            List<T> remainingItems = matchingItems.ToList();
-            Random random = new Random();
+            int clampedAmount = Math.Min(amount, sourceArray.Length);
+            T[] pool = (T[])sourceArray.Clone();
 
-            while (remainingItemsCount > 0 && remainingItems.Count > 0)
+            for (int i = pool.Length - 1; i > 0; i--)
             {
-                int next = random.Next(remainingItems.Count);
-                selectedItems.Add(remainingItems[next]);
-                remainingItemsCount--;
-                if (!allowDuplicates)
-                {
-                    remainingItems.RemoveAt(next);
-                }
+                int j = random.Next(i + 1);
+                (pool[i], pool[j]) = (pool[j], pool[i]);
             }
 
-            return selectedItems.ToArray();
+            T[] selected = new T[clampedAmount];
+            Array.Copy(pool, selected, clampedAmount);
+            return selected;
         }
 
-        /// <summary>
-        /// Obtém uma quantidade aleatória de elementos da interseção entre um array e uma coleção de valores.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sourceArray">Array de elementos de origem</param>
-        /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos na interseção</param>
-        /// <param name="dataValues">Coleção de valores para a interseção</param>
-        /// <param name="allowDuplicates">Indica se permite valores duplicados</param>
-        /// <returns>Array de elementos aleatórios na interseção</returns>
+        public static T[] GetRandomAmount<T>(this T[] sourceArray, int numberOfItems, Func<T, bool> criteria, bool allowDuplicates = false)
+        {
+            if (sourceArray == null || numberOfItems <= 0)
+                return Array.Empty<T>();
+
+            T[] matchingItems = sourceArray.Where(criteria).ToArray();
+            return matchingItems.GetRandomAmount(numberOfItems, allowDuplicates);
+        }
+
         public static T[] GetRandomIntersect<T>(this T[] sourceArray, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
         {
             T[] intersectedValues = sourceArray.Intersect(dataValues).ToArray();
-            return intersectedValues.GetRandomAmount(amount);
+            return intersectedValues.GetRandomAmount(amount, allowDuplicates);
         }
 
-        /// <summary>
-        /// Obtém uma quantidade aleatória de elementos que não estão em uma coleção de valores.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sourceArray">Array de elementos de origem</param>
-        /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos excluindo valores da coleção</param>
-        /// <param name="dataValues">Coleção de valores a serem excluídos</param>
-        /// <param name="allowDuplicates">Indica se permite valores duplicados</param>
-        /// <returns>Array de elementos aleatórios excluindo valores da coleção</returns>
         public static T[] GetRandomExcept<T>(this T[] sourceArray, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
         {
             T[] valuesExcept = sourceArray.Except(dataValues).ToArray();
-            return valuesExcept.GetRandomAmount(amount);
+            return valuesExcept.GetRandomAmount(amount, allowDuplicates);
         }
 
-        /// <summary>
-        /// Calcula o comprimento de um array menos 1, garantindo que o resultado não seja menor que 0.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sourceArray">Array cujo comprimento será calculado</param>
-        /// <returns>Comprimento do array menos 1, não negativo</returns>
         public static int LengthLessOne<T>(this T[] sourceArray)
         {
-            return (int)Mathf.Clamp(sourceArray.Length - 1, 0, float.MaxValue);
+            return Math.Max(sourceArray.Length - 1, 0);
         }
 
-        /// <summary>
-        /// Encontra o índice de um item em um array genérico.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sourceArray">Array genérico em que o item será procurado</param>
-        /// <param name="item">Item a ser procurado no array</param>
-        /// <param name="value">Índice do item encontrado</param>
-        /// <returns>Retorna verdadeiro se o item for encontrado no array, falso caso contrário</returns>
         public static bool FindIndex<T>(this T[] sourceArray, T item, out int value)
         {
             value = Array.FindIndex(sourceArray, val => val.Equals(item));
             return value != -1;
         }
 
-        /// <summary>
-        /// Esta extensão retorna o índice do primeiro elemento na array que é igual ao item especificado.
-        /// </summary>
-        /// <typeparam name="T">O tipo de elementos da array</typeparam>
-        /// <param name="sourceArray">A array na qual será feita a busca</param>
-        /// <param name="item">O item que será procurado</param>
-        /// <returns>O índice do primeiro elemento igual ao item especificado, ou -1 se o item não for encontrado.</returns>
         public static int FindIndex<T>(this T[] sourceArray, T item)
         {
             return Array.FindIndex(sourceArray, val => val.Equals(item));
         }
 
-        /// <summary>
-        /// Ordena uma lista de forma aleatória.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico da lista.</typeparam>
-        /// <param name="sourceArray">Array a ser embaralhado.</param>
-        /// <returns>Retorna uma nova lista com os elementos embaralhados.</returns>
         public static T[] ShuffledOrder<T>(this T[] sourceArray)
         {
             Random random = new Random();
-            return sourceArray.OrderBy(x => random.Next()).ToArray();
+            T[] copy = (T[])sourceArray.Clone();
+
+            for (int i = copy.Length - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                (copy[i], copy[j]) = (copy[j], copy[i]);
+            }
+
+            return copy;
         }
     }
 }

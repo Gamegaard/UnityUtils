@@ -8,62 +8,55 @@ namespace Gamegaard.Utils
     public static class GameObjectUtils
     {
         /// <summary>
-        /// Checa se o GameObject tem um componente específico.
+        /// Returns true when the GameObject has a component of type T.
         /// </summary>
-        public static bool HasComponent<T>(this GameObject go) where T : Component
+        public static bool HasComponent<T>(this GameObject gameObject)
         {
-            return go.GetComponent<T>();
+            return gameObject.GetComponent<T>() != null;
         }
 
         /// <summary>
-        /// Ativa ou desativa todos os componentes do GameObject.
+        /// Enables or disables every MonoBehaviour attached to the GameObject.
         /// </summary>
-        public static void SetAllComponentsEnabled(this GameObject go, bool isActive)
+        public static void SetAllComponentsEnabled(this GameObject gameObject, bool isEnabled)
         {
-            MonoBehaviour[] itemz = go.GetComponents<MonoBehaviour>();
-            for (int i = 0; i < itemz.Length; i++)
+            MonoBehaviour[] components = gameObject.GetComponents<MonoBehaviour>();
+            for (int index = 0; index < components.Length; index++)
             {
-                MonoBehaviour c = itemz[i];
-                c.enabled = isActive;
+                components[index].enabled = isEnabled;
             }
         }
 
         /// <summary>
-        /// Retorna verdadeiro quando o objeto não é nulo.
+        /// Returns true when the object is not null, accounting for Unity's fake-null objects.
         /// </summary>
-        public static bool IsAlive(this object aObj)
+        public static bool IsAlive(this object target)
         {
-            return aObj != null || aObj as Object != null;
+            return target != null || target as Object != null;
         }
 
         /// <summary>
-        /// Returns the component if it is present in the children of the current object. Excludes itself from the search (caster).
+        /// Returns the first component or interface of type T found in the children, excluding the caster itself.
         /// </summary>
         /// <param name="caster">The current object.</param>
-        /// <param name="includeInactive">Specifies whether the method should include components of inactive objects (default = false).</param>
-        /// <typeparam name="T">The type of component to be found.</typeparam>
-        /// <returns>The component if found, null Otherwise.</returns>
-        public static T GetComponentInChildrenIgnoreSelf<T>(this GameObject caster, bool includeInactive = false) where T : Component
+        /// <param name="includeInactive">Whether inactive children should be included in the search.</param>
+        /// <typeparam name="T">The component or interface type to search for.</typeparam>
+        public static T GetComponentInChildrenIgnoreSelf<T>(this GameObject caster, bool includeInactive = false)
         {
-            T[] components = caster.GetComponentsInChildren<T>(includeInactive);
+            Component[] components = caster.GetComponentsInChildren<Component>(includeInactive);
 
-            foreach (T component in components)
+            foreach (Component component in components)
             {
-                if (component.gameObject != caster)
-                {
-                    return component;
-                }
+                if (component.gameObject == caster) continue;
+                if (component is T typedComponent) return typedComponent;
             }
-            return null;
+
+            return default;
         }
 
         /// <summary>
-        /// Checks if the specified flag is set in the given value.
+        /// Checks whether the specified flag is set in the given value.
         /// </summary>
-        /// <param name="flag">The flag to be checked.</param>
-        /// <param name="value">The value to check the flag against.</param>
-        /// <typeparam name="T">The enum type.</typeparam>
-        /// <returns>True if the flag is set, false otherwise.</returns>
         public static bool HasFlag<T>(this T flag, T value) where T : Enum
         {
             int intFlag = Convert.ToInt32(flag);
@@ -72,87 +65,56 @@ namespace Gamegaard.Utils
         }
 
         /// <summary>
-        /// Finds a child with the specified name recursively in the given parent.
+        /// Recursively searches for a child with the given name.
         /// </summary>
-        /// <param name="parent">The transform to search.</param>
-        /// <param name="name">The target child name.</param>
-        /// <returns>The child if found, null otherwise.</returns>
         public static Transform FindDeepChild(this Transform parent, string name)
         {
             Transform result = parent.Find(name);
             if (result != null) return result;
+
             foreach (Transform child in parent)
             {
                 result = FindDeepChild(child, name);
                 if (result != null) return result;
             }
+
             return null;
         }
 
         /// <summary>
-        /// Finds a child with the specified name and component type recursively in the given parent.
+        /// Recursively searches for a child with the given name and returns its component or interface of type T.
         /// </summary>
-        /// <typeparam name="T">The component type to search for.</typeparam>
-        /// <param name="parent">The transform to search.</param>
-        /// <param name="name">The target child name.</param>
-        /// <returns>The component if found, null otherwise.</returns>
-        public static T FindDeepChildAs<T>(this Transform parent, string name) where T : Component
+        public static T FindDeepChildAs<T>(this Transform parent, string name)
         {
             Transform result = parent.Find(name);
-#if UNITY_2019_2_OR_NEWER
-            if (result != null && result.TryGetComponent(out T component1)) return component1;
-            foreach (Transform child in parent)
-            {
-                result = FindDeepChild(child, name);
-                if (result != null && result.TryGetComponent(out T component2)) return component2;
-            }
-            return null;
-#else
-            if (result != null)
-            {
-                T component1 = result.GetComponent<T>();
-                if (component1 != null) return component1;
-            }
+            if (result != null && result.TryGetComponent(out T component)) return component;
 
             foreach (Transform child in parent)
             {
                 result = FindDeepChild(child, name);
-                if (result != null)
-                {
-                    T component2 = result.GetComponent<T>();
-                    if (component2 != null) return component2;
-                }
+                if (result != null && result.TryGetComponent(out T childComponent)) return childComponent;
             }
-            return null;        
-#endif
+
+            return default;
         }
 
         /// <summary>
-        /// Searches for a component of type T only among the direct children of the object.
+        /// Searches for a component or interface of type T only among the direct children of the object.
         /// </summary>
-        /// <typeparam name="T">The type of the component to search for.</typeparam>
-        /// <param name="parent">The parent object whose direct children will be checked.</param>
-        /// <returns>The first component of type T found, or null if none is found.</returns>
-        public static T GetComponentInDirectChildren<T>(this GameObject parent) where T : Component
+        public static T GetComponentInDirectChildren<T>(this GameObject parent)
         {
             foreach (Transform child in parent.transform)
             {
-                T component = child.GetComponent<T>();
-                if (component != null)
-                {
-                    return component;
-                }
+                if (child.TryGetComponent(out T component)) return component;
             }
-            return null;
+
+            return default;
         }
 
         /// <summary>
-        /// Searches for components of type T only among the direct children of the object.
+        /// Searches for components or interfaces of type T only among the direct children of the object.
         /// </summary>
-        /// <typeparam name="T">The type of the components to search for.</typeparam>
-        /// <param name="parent">The parent object whose direct children will be checked.</param>
-        /// <returns>An IEnumerable of components of type T found among the direct children.</returns>
-        public static IEnumerable<T> GetComponentsInDirectChildren<T>(this GameObject parent) where T : Component
+        public static IEnumerable<T> GetComponentsInDirectChildren<T>(this GameObject parent)
         {
             foreach (Transform child in parent.transform)
             {
@@ -164,12 +126,9 @@ namespace Gamegaard.Utils
         }
 
         /// <summary>
-        /// Searches for components of type T only among the direct children of the object and adds them to a provided list.
+        /// Searches for components or interfaces of type T only among the direct children of the object and adds them to the provided list.
         /// </summary>
-        /// <typeparam name="T">The type of the components to search for.</typeparam>
-        /// <param name="parent">The parent object whose direct children will be checked.</param>
-        /// <param name="results">The list to which the components will be added.</param>
-        public static void GetComponentsInDirectChildren<T>(this GameObject parent, List<T> results) where T : Component
+        public static void GetComponentsInDirectChildren<T>(this GameObject parent, List<T> results)
         {
             foreach (Transform child in parent.transform)
             {
@@ -180,45 +139,43 @@ namespace Gamegaard.Utils
             }
         }
 
-        public static T GetComponentInDirectChildren<T>(this Transform transform, string childrenName) where T : Component
+        /// <summary>
+        /// Searches for a component or interface of type T among the direct children matching the given name.
+        /// </summary>
+        public static T GetComponentInDirectChildren<T>(this Transform transform, string childName)
         {
             foreach (Transform child in transform)
             {
-                if (child.name.Equals(childrenName, StringComparison.OrdinalIgnoreCase))
-                {
-                    if (child.TryGetComponent(out T slotView))
-                    {
-                        return slotView;
-                    }
-                }
+                if (!child.name.Equals(childName, StringComparison.OrdinalIgnoreCase)) continue;
+                if (child.TryGetComponent(out T component)) return component;
             }
 
-            return null;
+            return default;
         }
 
-        public static T GetComponentInChildren<T>(this Transform transform, string childrenName) where T : Component
+        /// <summary>
+        /// Recursively searches for a component or interface of type T among children matching the given name.
+        /// </summary>
+        public static T GetComponentInChildren<T>(this Transform transform, string childName)
         {
             foreach (Transform child in transform)
             {
-                if (child.name.Equals(childrenName, StringComparison.OrdinalIgnoreCase))
+                if (child.name.Equals(childName, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (child.TryGetComponent(out T component))
-                    {
-                        return component;
-                    }
+                    if (child.TryGetComponent(out T component)) return component;
                 }
 
-                T result = child.GetComponentInChildren<T>(childrenName);
-                if (result != null)
-                {
-                    return result;
-                }
+                T result = child.GetComponentInChildren<T>(childName);
+                if (result != null) return result;
             }
 
-            return null;
+            return default;
         }
 
-        public static T GetComponentInParents<T>(this Transform transform, string parentName) where T : Component
+        /// <summary>
+        /// Walks up the hierarchy searching for a component or interface of type T on a parent matching the given name.
+        /// </summary>
+        public static T GetComponentInParents<T>(this Transform transform, string parentName)
         {
             Transform current = transform.parent;
 
@@ -226,58 +183,53 @@ namespace Gamegaard.Utils
             {
                 if (current.name.Equals(parentName, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (current.TryGetComponent(out T component))
-                    {
-                        return component;
-                    }
+                    if (current.TryGetComponent(out T component)) return component;
                 }
 
                 current = current.parent;
             }
 
-            return null;
+            return default;
         }
 
-        public static bool TryGetComponentInDirectChildren<T>(this Transform transform, string childrenName, out T component) where T : Component
+        /// <summary>
+        /// Tries to find a component or interface of type T among the direct children matching the given name.
+        /// </summary>
+        public static bool TryGetComponentInDirectChildren<T>(this Transform transform, string childName, out T component)
         {
             foreach (Transform child in transform)
             {
-                if (child.name.Equals(childrenName, StringComparison.OrdinalIgnoreCase))
-                {
-                    if (child.TryGetComponent(out component))
-                    {
-                        return true;
-                    }
-                }
+                if (!child.name.Equals(childName, StringComparison.OrdinalIgnoreCase)) continue;
+                if (child.TryGetComponent(out component)) return true;
             }
 
-            component = null;
+            component = default;
             return false;
         }
 
-        public static bool TryGetComponentInChildren<T>(this Transform transform, string childrenName, out T component) where T : Component
+        /// <summary>
+        /// Recursively tries to find a component or interface of type T among children matching the given name.
+        /// </summary>
+        public static bool TryGetComponentInChildren<T>(this Transform transform, string childName, out T component)
         {
             foreach (Transform child in transform)
             {
-                if (child.name.Equals(childrenName, StringComparison.OrdinalIgnoreCase))
+                if (child.name.Equals(childName, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (child.TryGetComponent(out component))
-                    {
-                        return true;
-                    }
+                    if (child.TryGetComponent(out component)) return true;
                 }
 
-                if (child.TryGetComponentInChildren(childrenName, out component))
-                {
-                    return true;
-                }
+                if (child.TryGetComponentInChildren(childName, out component)) return true;
             }
 
-            component = null;
+            component = default;
             return false;
         }
 
-        public static bool TryGetComponentInParents<T>(this Transform transform, string parentName, out T component) where T : Component
+        /// <summary>
+        /// Walks up the hierarchy trying to find a component or interface of type T on a parent matching the given name.
+        /// </summary>
+        public static bool TryGetComponentInParents<T>(this Transform transform, string parentName, out T component)
         {
             Transform current = transform.parent;
 
@@ -285,16 +237,13 @@ namespace Gamegaard.Utils
             {
                 if (current.name.Equals(parentName, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (current.TryGetComponent(out component))
-                    {
-                        return true;
-                    }
+                    if (current.TryGetComponent(out component)) return true;
                 }
 
                 current = current.parent;
             }
 
-            component = null;
+            component = default;
             return false;
         }
     }

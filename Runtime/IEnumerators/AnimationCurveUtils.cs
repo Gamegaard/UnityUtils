@@ -7,33 +7,33 @@ namespace Gamegaard.Utils
         /// <summary>
         /// Gets the maximum value from the AnimationCurve by checking all keys.
         /// </summary>
-        public static int GetMaxValueFromCurve(this AnimationCurve curve)
+        public static float GetMaxValueFromCurve(this AnimationCurve curve)
         {
+            if (curve.keys.Length == 0) return 0f;
+
             float maxValue = float.MinValue;
-            foreach (Keyframe key in curve.keys)
+            for (int i = 0; i < curve.keys.Length; i++)
             {
-                if (key.value > maxValue)
-                {
-                    maxValue = key.value;
-                }
+                Keyframe key = curve.keys[i];
+                if (key.value > maxValue) maxValue = key.value;
             }
-            return Mathf.RoundToInt(maxValue);
+            return maxValue;
         }
 
         /// <summary>
         /// Gets the minimum value from the AnimationCurve by checking all keys.
         /// </summary>
-        public static int GetMinValueFromCurve(this AnimationCurve curve)
+        public static float GetMinValueFromCurve(this AnimationCurve curve)
         {
+            if (curve.keys.Length == 0) return 0f;
+
             float minValue = float.MaxValue;
-            foreach (Keyframe key in curve.keys)
+            for (int i = 0; i < curve.keys.Length; i++)
             {
-                if (key.value < minValue)
-                {
-                    minValue = key.value;
-                }
+                Keyframe key = curve.keys[i];
+                if (key.value < minValue) minValue = key.value;
             }
-            return Mathf.RoundToInt(minValue);
+            return minValue;
         }
     }
 }

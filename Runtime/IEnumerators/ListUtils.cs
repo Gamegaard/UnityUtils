@@ -1,201 +1,139 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Gamegaard.Utils
 {
     public static class ListUtils
     {
+        private static readonly System.Random random = new System.Random();
+
         public static List<T> GetComponents<T>(this IReadOnlyList<GameObject> sourceList) where T : Component
         {
-            List<T> components = new List<T>();
-
-            foreach (GameObject t in sourceList)
+            List<T> components = new List<T>(sourceList.Count);
+            foreach (GameObject gameObject in sourceList)
             {
-                if (t.TryGetComponent(out T component))
-                {
+                if (gameObject.TryGetComponent(out T component))
                     components.Add(component);
-                }
             }
-
             return components;
         }
 
         public static List<G> GetComponents<T, G>(this IReadOnlyList<T> sourceList) where T : Component where G : Component
         {
-            List<G> components = new List<G>();
-
-            foreach (T t in sourceList)
+            List<G> components = new List<G>(sourceList.Count);
+            foreach (T item in sourceList)
             {
-                if (t.TryGetComponent(out G component))
-                {
+                if (item.TryGetComponent(out G component))
                     components.Add(component);
-                }
             }
-
             return components;
         }
 
-        #region List
-        /// <summary>
-        /// Obtém uma quantidade aleatória de elementos de uma lista.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico</typeparam>
-        /// <param name="sourceList">Lista de elementos</param>
-        /// <param name="amount">Quantidade de elementos aleatórios a serem obtidos</param>
-        /// <returns>Retorna uma lista de elementos aleatórios</returns>
         public static List<T> GetRandomAmount<T>(this IReadOnlyList<T> sourceList, int amount, bool allowDuplicates = false)
         {
-            if (sourceList == null || amount <= 0)
-            {
+            if (sourceList == null || sourceList.Count == 0 || amount <= 0)
                 return new List<T>();
-            }
-
-            System.Random rnd = new System.Random();
-            List<T> shuffledList = sourceList.OrderBy(x => rnd.Next()).ToList();
-
-            if (!allowDuplicates && shuffledList.Count < amount)
-            {
-                amount = shuffledList.Count;
-            }
-
-            HashSet<T> selectedSet = new HashSet<T>();
-            List<T> selectedItems = new List<T>();
-
-            while (selectedItems.Count < amount)
-            {
-                int index = rnd.Next(shuffledList.Count);
-                T selectedItem = shuffledList[index];
-
-                if (allowDuplicates || selectedSet.Add(selectedItem))
-                {
-                    selectedItems.Add(selectedItem);
-                }
-            }
-
-            return selectedItems;
-        }
-
-        public static List<T> GetRandomAmount<T>(this IReadOnlyList<T> sourceList, int numberOfItems, Func<T, bool> criteria, bool allowDuplicates = false)
-        {
-            List<T> selectedItems = new List<T>();
-            List<T> matchingItems = sourceList.Where(item => criteria(item)).ToList();
-
-            int remainingItemsCount = numberOfItems;
 
             if (allowDuplicates)
             {
-                selectedItems.AddRange(matchingItems);
-                remainingItemsCount -= matchingItems.Count;
+                List<T> result = new List<T>(amount);
+                for (int i = 0; i < amount; i++)
+                    result.Add(sourceList[random.Next(sourceList.Count)]);
+                return result;
             }
 
-            List<T> remainingItems = matchingItems.ToList();
-            System.Random random = new System.Random();
+            int clampedAmount = Math.Min(amount, sourceList.Count);
 
-            while (remainingItemsCount > 0 && remainingItems.Count > 0)
+            if (clampedAmount == sourceList.Count)
+                return new List<T>(sourceList);
+
+            List<T> pool = new List<T>(sourceList);
+            FisherYatesShuffle(pool);
+            return pool.GetRange(0, clampedAmount);
+        }
+
+        public static List<T> GetRandomAmount<T>(this IReadOnlyList<T> sourceList, int amount, Func<T, bool> criteria, bool allowDuplicates = false)
+        {
+            if (sourceList == null || amount <= 0)
+                return new List<T>();
+
+            List<T> matchingItems = new List<T>();
+            foreach (T item in sourceList)
             {
-                int next = random.Next(remainingItems.Count);
-                selectedItems.Add(remainingItems[next]);
-                remainingItemsCount--;
-                if (!allowDuplicates)
-                {
-                    remainingItems.RemoveAt(next);
-                }
+                if (criteria(item))
+                    matchingItems.Add(item);
             }
 
-            return selectedItems;
+            return matchingItems.GetRandomAmount(amount, allowDuplicates);
         }
 
         public static List<T> GetRandomIntersect<T>(this IReadOnlyList<T> sourceList, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
         {
-            List<T> intersectedValues = sourceList.Intersect(dataValues).ToList();
-            return intersectedValues.GetRandomAmount(amount, allowDuplicates);
+            HashSet<T> valueSet = new HashSet<T>(dataValues);
+            List<T> intersected = new List<T>();
+            foreach (T item in sourceList)
+            {
+                if (valueSet.Contains(item))
+                    intersected.Add(item);
+            }
+            return intersected.GetRandomAmount(amount, allowDuplicates);
         }
 
         public static List<T> GetRandomExcept<T>(this IReadOnlyList<T> sourceList, int amount, IEnumerable<T> dataValues, bool allowDuplicates = false)
         {
-            List<T> valuesExcept = sourceList.Except(dataValues).ToList();
-            return valuesExcept.GetRandomAmount(amount, allowDuplicates);
+            HashSet<T> valueSet = new HashSet<T>(dataValues);
+            List<T> excepted = new List<T>();
+            foreach (T item in sourceList)
+            {
+                if (!valueSet.Contains(item))
+                    excepted.Add(item);
+            }
+            return excepted.GetRandomAmount(amount, allowDuplicates);
         }
 
-        /// <summary>
-        /// Obtém o valor inteiro da contagem da lista menos um, usando a função Clamp do Mathf para garantir que o resultado seja sempre entre 0 e float.MaxValue.
-        /// </summary>
-        /// <typeparam name="T">O tipo de elemento da lista.</typeparam>
-        /// <param name="sourceList">A lista a ser contada.</param>
-        /// <returns>Retorna o valor inteiro da contagem da lista menos um, nunca negativo</returns>
         public static int FinalIndex<T>(this IReadOnlyList<T> sourceList)
         {
-            return Mathf.Max(sourceList.Count - 1, 0);
+            return Math.Max(sourceList.Count - 1, 0);
         }
 
-        /// <summary>
-        /// Verifica se a lista atingiu sua capacidade máxima de elementos.
-        /// </summary>
-        /// <typeparam name="T">O tipo de elemento da lista.</typeparam>
-        /// <param name="sourceList">A lista a ser verificada.</param>
-        /// <returns>Retorna true se a lista estiver cheia</returns>
         public static bool IsFull<T>(this List<T> sourceList)
         {
             return sourceList.Count == sourceList.Capacity;
         }
 
-        /// <summary>
-        /// Obtém o espaço restante na capacidade da lista.
-        /// </summary>
-        /// <typeparam name="T">O tipo de elemento da lista.</typeparam>
-        /// <param name="sourceList">A lista a ser verificada.</param>
-        /// <returns>Retorna o espaço restante na capacidade da lista.</returns>
         public static int RemainingSpace<T>(this List<T> sourceList)
         {
             return sourceList.Capacity - sourceList.Count;
         }
 
-        /// <summary>
-        /// Ordena uma lista de forma aleatória e retorna uma nova.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico da lista.</typeparam>
-        /// <param name="sourceList">Lista a ser embaralhada.</param>
-        /// <returns>Retorna uma nova lista com os elementos embaralhados.</returns>
         public static List<T> ShuffledOrder<T>(this IReadOnlyList<T> sourceList)
         {
-            System.Random random = new System.Random();
-            return sourceList.OrderBy(x => random.Next()).ToList();
+            List<T> copy = new List<T>(sourceList);
+            FisherYatesShuffle(copy);
+            return copy;
         }
 
-        /// <summary>
-        /// Ordena uma lista de forma aleatória.
-        /// </summary>
-        /// <typeparam name="T">Tipo genérico da lista.</typeparam>
-        /// <param name="sourceList">Lista a ser embaralhada.</param>
         public static void Shuffle<T>(this IList<T> list)
         {
-            System.Random rng = new System.Random();
-            int n = list.Count;
-            while (n > 1)
-            {
-                int k = rng.Next(n--);
-                (list[n], list[k]) = (list[k], list[n]);
-            }
+            FisherYatesShuffle(list);
         }
 
-        /// <summary>
-        /// Combina duas listas em uma nova.
-        /// </summary>
-        /// <typeparam name="T">O tipo de elemento das listas a serem combinadas.</typeparam>
-        /// <param name="sourceList">A primeira lista a ser combinada.</param>
-        /// <param name="otherList">A segunda lista a ser combinada.</param>
-        /// <returns>Retorna uma nova Lista com os elementos de A e B.</returns>
         public static List<T> Combine<T>(this List<T> sourceList, List<T> otherList)
         {
-            int arraySize = sourceList.Count + otherList.Count;
-            T[] combined = new T[arraySize];
-
-            sourceList.CopyTo(combined);
-            otherList.CopyTo(combined, sourceList.Count);
-            return new List<T>(combined);
+            List<T> combined = new List<T>(sourceList.Count + otherList.Count);
+            combined.AddRange(sourceList);
+            combined.AddRange(otherList);
+            return combined;
         }
-        #endregion
+
+        private static void FisherYatesShuffle<T>(IList<T> list)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
+            }
+        }
     }
 }

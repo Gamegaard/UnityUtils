@@ -9,7 +9,7 @@ namespace Gamegaard.Utils
         /// </summary>
         public static int GetRandomSign()
         {
-            return Random.value < .5 ? 1 : -1;
+            return Random.value < 0.5f ? 1 : -1;
         }
 
         /// <summary>
@@ -17,7 +17,7 @@ namespace Gamegaard.Utils
         /// </summary>
         public static int ClampIntToZero(int value)
         {
-            return (int)Mathf.Clamp(value, 0, float.MaxValue);
+            return Mathf.Max(value, 0);
         }
 
         /// <summary>
