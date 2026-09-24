@@ -1,0 +1,19 @@
+{
+  "name": "com.gamegaard.utils",
+  "version": "1.0.4",
+  "displayName": "Gamegaard Utils",
+  "description": "Reusable Unity engine-level runtime and editor utilities for Gamegaard consumers.",
+  "unity": "2021.3",
+  "author": {
+    "name": "Gamegaard",
+    "email": "contact@gamegaard.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gamegaard/UnityUtils.git"
+  },
+  "dependencies": {
+    "com.unity.inputsystem": "1.4.4",
+    "com.unity.textmeshpro": "3.0.6"
+  }
+}
