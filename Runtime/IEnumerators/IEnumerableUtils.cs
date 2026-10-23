@@ -53,7 +53,7 @@ namespace Gamegaard.Utils
         public static IEnumerable<T> GetShuffled<T>(this IEnumerable<T> source)
         {
             System.Random random = new System.Random();
-            T[] array = source as T[] ?? source.ToArray();
+            T[] array = source.ToArray();
 
             for (int i = array.Length - 1; i > 0; i--)
             {
@@ -86,7 +86,7 @@ namespace Gamegaard.Utils
         {
             if (amount <= 0) return Enumerable.Empty<T>();
 
-            T[] array = sourceSequence as T[] ?? sourceSequence.ToArray();
+            T[] array = sourceSequence.ToArray();
             if (array.Length == 0) return Enumerable.Empty<T>();
 
             int clampedAmount = Math.Min(amount, array.Length);
