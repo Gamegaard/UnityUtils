@@ -9,12 +9,13 @@ namespace Gamegaard.Utils
         /// </summary>
         public static float GetMaxValueFromCurve(this AnimationCurve curve)
         {
-            if (curve.keys.Length == 0) return 0f;
+            Keyframe[] keyframes = curve.keys;
+            if (keyframes.Length == 0) return 0f;
 
             float maxValue = float.MinValue;
-            for (int i = 0; i < curve.keys.Length; i++)
+            for (int i = 0; i < keyframes.Length; i++)
             {
-                Keyframe key = curve.keys[i];
+                Keyframe key = keyframes[i];
                 if (key.value > maxValue) maxValue = key.value;
             }
             return maxValue;
@@ -25,12 +26,13 @@ namespace Gamegaard.Utils
         /// </summary>
         public static float GetMinValueFromCurve(this AnimationCurve curve)
         {
-            if (curve.keys.Length == 0) return 0f;
+            Keyframe[] keyframes = curve.keys;
+            if (keyframes.Length == 0) return 0f;
 
             float minValue = float.MaxValue;
-            for (int i = 0; i < curve.keys.Length; i++)
+            for (int i = 0; i < keyframes.Length; i++)
             {
-                Keyframe key = curve.keys[i];
+                Keyframe key = keyframes[i];
                 if (key.value < minValue) minValue = key.value;
             }
             return minValue;
