@@ -32,7 +32,9 @@ namespace Gamegaard.Utils
         /// </summary>
         public static bool IsAlive(this object target)
         {
-            return target != null || target as Object != null;
+            if (target is Object unityObject) return unityObject != null;
+
+            return target != null;
         }
 
         /// <summary>
