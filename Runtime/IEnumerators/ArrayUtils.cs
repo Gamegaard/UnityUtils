@@ -87,13 +87,13 @@ namespace Gamegaard.Utils
 
         public static bool FindIndex<T>(this T[] sourceArray, T item, out int value)
         {
-            value = Array.FindIndex(sourceArray, val => val.Equals(item));
+            value = Array.IndexOf(sourceArray, item);
             return value != -1;
         }
 
         public static int FindIndex<T>(this T[] sourceArray, T item)
         {
-            return Array.FindIndex(sourceArray, val => val.Equals(item));
+            return Array.IndexOf(sourceArray, item);
         }
 
         public static T[] ShuffledOrder<T>(this T[] sourceArray)
