@@ -4,37 +4,47 @@ namespace Gamegaard.Utils
 {
     public static class EnumUtils
     {
+        private static class EnumValueCache<T> where T : Enum
+        {
+            public static readonly T[] Values = (T[])Enum.GetValues(typeof(T));
+        }
+
         public static T GetRandomEnumValue<T>() where T : Enum
         {
-            Array enumValues = Enum.GetValues(typeof(T));
-            int randomIndex = UnityEngine.Random.Range(0, enumValues.Length);
-            return (T)enumValues.GetValue(randomIndex);
+            T[] enumValues = EnumValueCache<T>.Values;
+            if (enumValues.Length == 0) throw new InvalidOperationException("Cannot select a value from an empty enum.");
+
+            return enumValues[UnityEngine.Random.Range(0, enumValues.Length)];
         }
 
         public static T GetRandomEnumValue<T>(Func<T, bool> condition) where T : Enum
         {
-            Array enumValues = Enum.GetValues(typeof(T));
-            int randomIndex;
-            T randomEnumValue;
+            if (condition == null) return GetRandomEnumValue<T>();
 
-            do
+            T[] enumValues = EnumValueCache<T>.Values;
+            if (enumValues.Length == 0) throw new InvalidOperationException("Cannot select a value from an empty enum.");
+
+            const int maximumRandomAttempts = 16;
+            for (int attempt = 0; attempt < maximumRandomAttempts; attempt++)
             {
-                randomIndex = UnityEngine.Random.Range(0, enumValues.Length);
-                randomEnumValue = (T)enumValues.GetValue(randomIndex);
-            }
-            while (!IsValid(randomEnumValue, condition));
-
-            return randomEnumValue;
-        }
-
-        private static bool IsValid<T>(T value, Func<T, bool> condition) where T : Enum
-        {
-            if (condition == null)
-            {
-                return true;
+                T randomValue = enumValues[UnityEngine.Random.Range(0, enumValues.Length)];
+                if (condition(randomValue)) return randomValue;
             }
 
-            return condition.Invoke(value);
+            int matchingCount = 0;
+            T selectedValue = default;
+
+            foreach (T enumValue in enumValues)
+            {
+                if (!condition(enumValue)) continue;
+
+                matchingCount++;
+                if (UnityEngine.Random.Range(0, matchingCount) == 0)
+                    selectedValue = enumValue;
+            }
+
+            if (matchingCount == 0) throw new InvalidOperationException("No enum values satisfy the provided condition.");
+            return selectedValue;
         }
 
         public static T[] GetRandomEnumValueAmount<T>(int amount) where T : Enum
