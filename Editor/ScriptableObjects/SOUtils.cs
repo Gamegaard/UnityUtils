@@ -22,7 +22,7 @@ namespace Gamegaard.Utils.Editor
                     }
                 }
 
-                string assetPath = AssetDatabase.GetAssetPath(obj.GetInstanceID());
+                string assetPath = AssetDatabase.GetAssetPath(obj);
                 AssetDatabase.RenameAsset(assetPath, finalName);
                 AssetDatabase.SaveAssets();
                 EditorUtility.SetDirty(obj);
