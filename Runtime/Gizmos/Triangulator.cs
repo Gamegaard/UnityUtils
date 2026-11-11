@@ -32,7 +32,7 @@ namespace Gamegaard
 
             int nv = n;
             int count = 2 * nv;
-            for (int m = 0, v = nv - 1; nv > 2;)
+            for (int v = nv - 1; nv > 2;)
             {
                 if ((count--) <= 0)
                     break;
